@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MYGAME Scratch - Free Online Games</title>
+  
+  <!-- SEO & AUTHOR METADATA -->
+  <meta name="author" content="Akshat">
+  <meta name="description" content="Akshat is a young web developer creating interactive web experiences and games on MYGAME Scratch.">
+  <meta name="keywords" content="mygame, scratch, games, Akshat, web developer, game developer">
+  <meta name="application-name" content="MYGAME Scratch">
+  <meta name="apple-mobile-web-app-title" content="MYGAME Scratch">
+  
+  <!-- STRUCTURED DATA FOR GOOGLE SEARCH -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "MYGAME Scratch",
+    "alternateName": "MYGAME",
+    "url": "https://sites.google.com/view/mygamescratch/",
+    "keywords": "mygame, scratch, games",
+    "author": {
+      "@type": "Person",
+      "name": "Akshat",
+      "jobTitle": "Young Web Developer",
+      "description": "Akshat is a young web developer creating interactive web experiences and games."
+    }
+  }
+  </script>
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --gold: #c29d4c;
+      --gold-light: #d4b060;
+      --gold-dim: rgba(194,157,76,0.15);
+      --dark: #0a0a0a;
+      --dark2: #111;
+      --text: #ffffff;
+      --text-muted: rgba(255,255,255,0.42);
+    }
+    body { background:var(--dark); font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:var(--text); overflow-x:hidden; }
+
+    /* ── COUNTDOWN ── */
+    #cd-screen {
+      position:fixed; inset:0; z-index:100;
+      display:flex; align-items:center; justify-content:center;
+      flex-direction:column; background:var(--dark);
+      transition:opacity 0.9s ease, transform 0.9s ease;
+    }
+    #cd-screen.hide { opacity:0; pointer-events:none; transform:scale(1.05); }
+
+    .grid-bg {
+      position:absolute; inset:0;
+      background-image:
+        linear-gradient(rgba(194,157,76,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(194,157,76,0.05) 1px, transparent 1px);
+      background-size:48px 48px;
+    }
+    .glow {
+      position:absolute; width:520px; height:520px; border-radius:50%;
+      background:radial-gradient(circle, rgba(194,157,76,0.1) 0%, transparent 68%);
+      top:50%; left:50%; transform:translate(-50%,-50%);
+      animation:pulse 3.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100%{opacity:0.5;transform:translate(-50%,-50%) scale(1)}
+      50%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}
+    }
+
+    .cd-inner { position:relative; z-index:2; text-align:center; padding:0 24px; }
+    .badge {
+      display:inline-block;
+      background:var(--gold-dim); border:1px solid rgba(194,157,76,0.4);
+      color:var(--gold); font-size:11px; font-weight:700; letter-spacing:3px;
+      text-transform:uppercase; padding:6px 20px; border-radius:100px; margin-bottom:28px;
+    }
+    .big-title {
+      font-size:clamp(54px,11vw,90px); font-weight:900;
+      letter-spacing:14px; text-transform:uppercase; line-height:1;
+      text-shadow:0 0 70px rgba(194,157,76,0.2);
+    }
+    .gold-bar { width:72px; height:3px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin:18px auto 14px; }
+    .sub { color:var(--text-muted); font-size:12px; letter-spacing:2.5px; text-transform:uppercase; margin-bottom:44px; }
+
+    .cd-nums { display:flex; gap:18px; align-items:center; justify-content:center; margin-bottom:50px; }
+    .cd-box { display:flex; flex-direction:column; align-items:center; gap:8px; }
+    .cd-num {
+      width:70px; height:70px; display:flex; align-items:center; justify-content:center;
+      background:rgba(255,255,255,0.04); border:1px solid rgba(194,157,76,0.28);
+      border-radius:8px; font-size:30px; font-weight:800; font-variant-numeric:tabular-nums;
+    }
+    .cd-lbl { font-size:10px; color:rgba(194,157,76,0.65); letter-spacing:1.5px; text-transform:uppercase; }
+    .cd-col { font-size:26px; color:rgba(194,157,76,0.35); font-weight:200; margin-top:22px; }
+
+    .live-msg { display:none; font-size:20px; font-weight:700; color:var(--gold); letter-spacing:3px; text-transform:uppercase; margin-bottom:36px; animation:pop 0.5s ease both; }
+    @keyframes pop { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
+
+    .btn-row { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; }
+    .btn-g { background:var(--gold); color:#0a0a0a; padding:13px 30px; border-radius:4px; font-size:13px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; text-decoration:none; border:none; cursor:pointer; transition:background .2s,transform .15s; display:inline-block; }
+    .btn-g:hover { background:var(--gold-light); transform:translateY(-1px); }
+    .btn-o { background:transparent; color:var(--gold); padding:12px 28px; border-radius:4px; font-size:13px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; text-decoration:none; border:1px solid var(--gold); cursor:pointer; transition:background .2s,transform .15s; display:inline-block; }
+    .btn-o:hover { background:var(--gold-dim); transform:translateY(-1px); }
+    .btn-q { background:transparent; color:var(--text-muted); padding:12px 18px; border-radius:4px; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; text-decoration:none; border:1px solid rgba(255,255,255,0.14); cursor:pointer; transition:all .2s; display:inline-block; }
+    .btn-q:hover { border-color:rgba(255,255,255,0.32); color:rgba(255,255,255,0.75); transform:translateY(-1px); }
+
+    /* ── HOMEPAGE ── */
+    #homepage { display:none; opacity:0; transition:opacity 0.9s ease 0.2s; }
+    #homepage.show { display:block; opacity:1; }
+
+    /* NAV */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:50;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:16px 40px;
+      background:rgba(10,10,10,0.88);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid rgba(194,157,76,0.08);
+    }
+    .nav-logo { font-size:18px; font-weight:900; letter-spacing:6px; text-transform:uppercase; text-decoration:none; color:var(--text); }
+    .nav-logo span { color:var(--gold); }
+    .nav-links { display:flex; gap:10px; align-items:center; }
+
+    /* HERO */
+    .hero {
+      min-height:100vh;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      text-align:center; padding:120px 24px 100px;
+      position:relative; overflow:hidden;
+      background:var(--dark);
+    }
+    .hero-badge {
+      display:inline-flex; align-items:center; gap:8px;
+      background:var(--gold-dim); border:1px solid rgba(194,157,76,0.3);
+      color:var(--gold); font-size:11px; font-weight:700; letter-spacing:2.5px;
+      text-transform:uppercase; padding:6px 18px; border-radius:100px; margin-bottom:32px;
+    }
+    .dot { width:7px; height:7px; border-radius:50%; background:var(--gold); animation:blink 1.3s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+
+    .hero-title { font-size:clamp(66px,13vw,108px); font-weight:900; letter-spacing:16px; text-transform:uppercase; line-height:1; text-shadow:0 0 100px rgba(194,157,76,0.18); position:relative; z-index:2; }
+    .hero-sub { color:var(--text-muted); font-size:13px; letter-spacing:3px; text-transform:uppercase; margin:22px 0 44px; position:relative; z-index:2; }
+    .hero-btns { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; position:relative; z-index:2; }
+
+    /* STATS */
+    .stats {
+      border-top:1px solid rgba(194,157,76,0.08);
+      border-bottom:1px solid rgba(194,157,76,0.08);
+      background:rgba(194,157,76,0.03);
+      display:flex; justify-content:center; flex-wrap:wrap;
+    }
+    .stat-item {
+      flex:1; min-width:160px; max-width:260px;
+      text-align:center; padding:36px 24px;
+      border-right:1px solid rgba(194,157,76,0.08);
+    }
+    .stat-item:last-child { border-right:none; }
+    .stat-num { font-size:36px; font-weight:900; color:var(--gold); letter-spacing:2px; }
+    .stat-lbl { font-size:11px; color:var(--text-muted); letter-spacing:2px; text-transform:uppercase; margin-top:6px; }
+
+    /* CTA */
+    .cta-section {
+      display:flex; flex-direction:column; align-items:center;
+      text-align:center; padding:100px 24px;
+      position:relative; overflow:hidden;
+      background:var(--dark2);
+    }
+    .cta-glow {
+      position:absolute; width:400px; height:400px; border-radius:50%;
+      background:radial-gradient(circle, rgba(194,157,76,0.07) 0%, transparent 70%);
+      top:50%; left:50%; transform:translate(-50%,-50%);
+    }
+    .cta-label { color:var(--gold); font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:16px; position:relative; z-index:2; }
+    .cta-title { font-size:clamp(28px,5vw,48px); font-weight:900; letter-spacing:4px; text-transform:uppercase; margin-bottom:16px; position:relative; z-index:2; }
+    .cta-desc { color:var(--text-muted); font-size:14px; line-height:1.7; max-width:440px; margin:0 auto 40px; position:relative; z-index:2; }
+    .cta-btns { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; position:relative; z-index:2; }
+
+    /* FOOTER */
+    footer {
+      border-top:1px solid rgba(194,157,76,0.08);
+      padding:28px 40px;
+      display:flex; justify-content:space-between; align-items:center;
+      flex-wrap:wrap; gap:14px;
+      background:rgba(0,0,0,0.3);
+    }
+    .footer-logo { font-size:16px; font-weight:900; letter-spacing:6px; text-transform:uppercase; }
+    .footer-logo span { color:var(--gold); }
+    .footer-copy { font-size:12px; color:var(--text-muted); letter-spacing:1px; }
+    .footer-links { display:flex; gap:20px; }
+    .footer-links a { color:var(--text-muted); text-decoration:none; font-size:12px; letter-spacing:1px; transition:color .2s; }
+    .footer-links a:hover { color:var(--gold); }
+
+    @media (max-width:600px) {
+      nav { padding:14px 20px; }
+      .nav-links .btn-q { display:none; }
+      footer { flex-direction:column; align-items:center; text-align:center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ COUNTDOWN SCREEN ══ -->
+<div id="cd-screen">
+  <div class="grid-bg"></div>
+  <div class="glow"></div>
+  <div class="cd-inner">
+    <div class="badge">🚀 Launch Day</div>
+    <div class="big-title">MYGAME</div>
+    <div class="gold-bar"></div>
+    <div class="sub">The game begins now</div>
+    <div class="cd-nums" id="cd-nums">
+      <div class="cd-box"><div class="cd-num" id="cd-h">00</div><div class="cd-lbl">Hours</div></div>
+      <div class="cd-col">:</div>
+      <div class="cd-box"><div class="cd-num" id="cd-m">00</div><div class="cd-lbl">Mins</div></div>
+      <div class="cd-col">:</div>
+      <div class="cd-box"><div class="cd-num" id="cd-s">00</div><div class="cd-lbl">Secs</div></div>
+    </div>
+    <div class="live-msg" id="live-msg">🎮 We Are Live!</div>
+    <div class="btn-row">
+      <a href="https://www.authpro.com/auth/Akshat24/?action=reg" target="_blank" class="btn-g">Register Now</a>
+      <a href="https://www.authpro.com/auth/Akshat24" target="_blank" class="btn-o">Login</a>
+      <a href="https://sites.google.com/view/mygamehelp" target="_top" class="btn-q">Help</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HOMEPAGE ══ -->
+<div id="homepage">
+  <nav>
+    <a href="#" class="nav-logo">MY<span>GAME</span></a>
+    <div class="nav-links">
+      <a href="https://sites.google.com/view/mygamehelp" target="_top" class="btn-q" style="padding:7px 14px;font-size:11px;">Help</a>
+      <a href="https://www.authpro.com/auth/Akshat24" target="_blank" class="btn-o" style="padding:7px 18px;font-size:11px;">Login</a>
+      <a href="https://www.authpro.com/auth/Akshat24/?action=reg" target="_blank" class="btn-g" style="padding:7px 18px;font-size:11px;">Register</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="grid-bg"></div>
+    <div class="glow"></div>
+    <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;">
+      <div class="hero-badge"><div class="dot"></div> Now Live</div>
+      <div class="hero-title">MYGAME</div>
+      <div class="gold-bar" style="width:80px;height:3px;margin:20px auto 0;"></div>
+      <div class="hero-sub">Play. Compete. Win.</div>
+      <div class="hero-btns">
+        <a href="https://www.authpro.com/auth/Akshat24/?action=reg" target="_blank" class="btn-g" style="padding:15px 38px;font-size:14px;">Start Playing</a>
+        <a href="https://www.authpro.com/auth/Akshat24" target="_blank" class="btn-o" style="padding:14px 34px;font-size:14px;">Login</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="stat-item"><div class="stat-num">100+</div><div class="stat-lbl">Players</div></div>
+    <div class="stat-item"><div class="stat-num">24/7</div><div class="stat-lbl">Online</div></div>
+    <div class="stat-item"><div class="stat-num">Free</div><div class="stat-lbl">To Play</div></div>
+  </div>
+
+  <section class="cta-section">
+    <div class="cta-glow"></div>
+    <div class="cta-label">Ready?</div>
+    <div class="cta-title">Join the Game</div>
+    <div class="gold-bar" style="width:60px;height:2px;margin:0 auto 24px;"></div>
+    <div class="cta-desc">Create your free account and jump in. It only takes seconds to get started.</div>
+    <div class="cta-btns">
+      <a href="https://www.authpro.com/auth/Akshat24/?action=reg" target="_blank" class="btn-g" style="padding:14px 36px;font-size:13px;">Create Account</a>
+      <a href="https://sites.google.com/view/mygamehelp" target="_top" class="btn-q" style="padding:13px 24px;">Need Help?</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-logo">MY<span>GAME</span></div>
+    <div class="footer-copy">© 2026 MyGame · All rights reserved</div>
+    <div class="footer-links">
+      <a href="https://sites.google.com/view/mygamehelp" target="_top">Help</a>
+      <a href="https://www.authpro.com/auth/Akshat24/?action=reg" target="_blank" style="color:var(--gold);">Register</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+  // ════════════════════════════════════════════
+  // SET YOUR LAUNCH DATE HERE ↓
+  // Format: new Date('YYYY-MM-DDTHH:MM:SS')
+  // Example: new Date('2026-07-10T10:00:00')
+  var launch = new Date('2026-06-28T12:30:00+05:30');
+  // ════════════════════════════════════════════
+
+  var revealed = false;
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  function reveal() {
+    if (revealed) return;
+    revealed = true;
+    document.getElementById('cd-nums').style.display = 'none';
+    document.getElementById('live-msg').style.display = 'block';
+    setTimeout(function(){
+      document.getElementById('cd-screen').classList.add('hide');
+      var hp = document.getElementById('homepage');
+      hp.style.display = 'block';
+      setTimeout(function(){ hp.classList.add('show'); }, 60);
+    }, 1800);
+  }
+
+  function tick(){
+    var diff = launch - Date.now();
+    if (diff <= 0){ reveal(); return; }
+    document.getElementById('cd-h').textContent = pad(Math.floor(diff/3600000));
+    document.getElementById('cd-m').textContent = pad(Math.floor((diff%3600000)/60000));
+    document.getElementById('cd-s').textContent = pad(Math.floor((diff%60000)/1000));
+  }
+  tick();
+  setInterval(tick, 1000);
+</script>
+
+</body>
+</html>
