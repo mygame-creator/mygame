@@ -1,521 +1,589 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP Members Area</title>
-    
-    <!-- ANTI-CACHE META TAGS -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-    
-    <script>
-        function applyInitialTheme() {
-            let savedTheme = 'system';
-            try { savedTheme = localStorage.getItem('mygame_theme') || 'system'; } catch (e) {}
-            if (savedTheme === 'light' || (savedTheme === 'system' && window.matchMedia('(prefers-color-scheme: light)').matches)) {
-                document.documentElement.classList.add('light-mode');
-            }
-        }
-        applyInitialTheme();
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mygame Scratch - Free Online Games by Akshat</title>
+  
+  <!-- SEO & AUTHOR METADATA -->
+  <meta name="author" content="Akshat">
+  <meta name="description" content="Mygame Scratch is a web gaming platform created and developed by Akshat, featuring free interactive online Scratch games.">
+  <meta name="keywords" content="mygame, mygamescratch, scratch, mygamescratch.vercel.app, games, Akshat, web developer, game developer">
+  <meta name="application-name" content="Mygame Scratch">
+  <meta name="apple-mobile-web-app-title" content="Mygame Scratch">
 
-    <!-- FIREBASE INTEGRATION & LOGOUT FIX -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged, 
-            signOut, 
-            deleteUser 
-        } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            deleteDoc 
-        } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+  <!-- GOOGLE ANALYTICS -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B1HQG0KC8Z"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCf0Pfa0HOV4ciAVtqwLVNq_gLcCtAAk8Q",
-            authDomain: "mygamescratch.firebaseapp.com",
-            projectId: "mygamescratch",
-            storageBucket: "mygamescratch.firebasestorage.app",
-            messagingSenderId: "256549154945",
-            appId: "1:256549154945:web:aa29c54bf7036cb3f65d80"
-        };
+    gtag('config', 'G-B1HQG0KC8Z');
+  </script>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+  <!-- FIREBASE SDK & AUTHENTICATION / FIRESTORE LOGIC -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
+    import { 
+      getAuth, 
+      createUserWithEmailAndPassword, 
+      signInWithEmailAndPassword, 
+      sendPasswordResetEmail,
+      GoogleAuthProvider,
+      signInWithPopup,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+    import { 
+      getFirestore, 
+      doc, 
+      setDoc, 
+      getDoc 
+    } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
-        // Protection Check: Redirect unauthenticated users
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.replace("https://mygamescratch.vercel.app/");
-            }
+    const firebaseConfig = {
+      apiKey: "AIzaSyCf0Pfa0HOV4ciAVtqwLVNq_gLcCtAAk8Q",
+      authDomain: "mygamescratch.firebaseapp.com",
+      projectId: "mygamescratch",
+      storageBucket: "mygamescratch.firebasestorage.app",
+      messagingSenderId: "256549154945",
+      appId: "1:256549154945:web:aa29c54bf7036cb3f65d80",
+      measurementId: "G-K8RS2L4P3V"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    async function ensureUserDocExists(user, username = null) {
+      const userRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(userRef);
+
+      if (!docSnap.exists()) {
+        await setDoc(userRef, {
+          email: user.email,
+          username: username || user.displayName || user.email.split('@')[0],
+          createdAt: new Date().toISOString()
         });
+      }
+    }
 
-        // Fixed Logout Function
-        window.handleFirebaseLogout = function() {
-            signOut(auth).then(() => {
-                window.location.replace("https://mygamescratch.vercel.app/");
-            }).catch((error) => {
-                alert("Error logging out: " + error.message);
-            });
-        };
+    window.handleGoogleSignIn = async function() {
+      try {
+        const result = await signInWithPopup(auth, googleProvider);
+        await ensureUserDocExists(result.user);
+        closeAuthModal();
+        window.location.href = "https://mygame-creator.github.io/vip-members/?v=2.0";
+      } catch (error) {
+        alert('Google Sign-In Error: ' + error.message);
+      }
+    };
 
-        // Fixed Delete Account Function
-        window.handleFirebaseDeleteAccount = async function() {
-            const confirmDelete = confirm("Are you sure you want to delete your account? This action cannot be undone.");
-            if (!confirmDelete) return;
+    window.openAuthModal = function(mode) {
+      const modal = document.getElementById('auth-modal');
+      const title = document.getElementById('auth-title');
+      const usernameGroup = document.getElementById('username-group');
+      const resetLink = document.getElementById('forgot-link');
+      const submitBtn = document.getElementById('auth-submit-btn');
 
-            const user = auth.currentUser;
-            if (user) {
-                try {
-                    await deleteDoc(doc(db, "users", user.uid));
-                    await deleteUser(user);
-                    alert("Your account has been deleted.");
-                    window.location.replace("https://mygamescratch.vercel.app/");
-                } catch (error) {
-                    alert("Error deleting account: " + error.message);
-                }
-            }
-        };
-    </script>
+      document.getElementById('auth-mode').value = mode;
+      modal.style.display = 'flex';
 
-    <style>
-        :root {
-            --bg: #0d0d0d;
-            --header-bg: rgba(13,13,13,0.95);
-            --text: #f0ece4;
-            --subtext: #777;
-            --card-bg: #161616;
-            --card-border: #2a2a2a;
-            --shadow: rgba(0,0,0,0.6);
-            --inst-bg: #1a1a1a;
-            --inst-text: #aaaaaa;
-            --gold: #c8a95a;
-            --accent: #e05c00;
-            --badge-bg: #1e1e1e;
-            --badge-text: #888;
-        }
+      if (mode === 'register') {
+        title.textContent = 'Create Account';
+        usernameGroup.style.display = 'block';
+        resetLink.style.display = 'none';
+        submitBtn.textContent = 'Register';
+      } else if (mode === 'login') {
+        title.textContent = 'Welcome Back';
+        usernameGroup.style.display = 'none';
+        resetLink.style.display = 'inline-block';
+        submitBtn.textContent = 'Login';
+      } else if (mode === 'reset') {
+        title.textContent = 'Reset Password';
+        usernameGroup.style.display = 'none';
+        resetLink.style.display = 'none';
+        submitBtn.textContent = 'Send Reset Link';
+      }
+    };
 
-        html.light-mode {
-            --bg: #f2f2f7; 
-            --header-bg: rgba(255, 255, 255, 0.75); 
-            --text: #1c1c1e; 
-            --subtext: #8e8e93;
-            --card-bg: #ffffff; 
-            --card-border: #e5e5ea;
-            --shadow: rgba(0, 0, 0, 0.06); 
-            --inst-bg: #fafafa;
-            --inst-text: #3a3a3c;
-            --gold: #d97706; 
-            --accent: #ff3b30;
-            --badge-bg: #e5e5ea;
-            --badge-text: #1c1c1e;
-        }
+    window.closeAuthModal = function() {
+      document.getElementById('auth-modal').style.display = 'none';
+      document.getElementById('auth-form').reset();
+    };
 
-        html.light-mode .header {
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
+    window.handleAuthForm = async function(e) {
+      e.preventDefault();
+      const mode = document.getElementById('auth-mode').value;
+      const email = document.getElementById('auth-email').value;
+      const password = document.getElementById('auth-password').value;
+      const username = document.getElementById('auth-username').value;
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      try {
+        if (mode === 'register') {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          await ensureUserDocExists(userCredential.user, username);
+          closeAuthModal();
+          window.location.href = "https://mygame-creator.github.io/vip-members/?v=2.0";
+        } else if (mode === 'login') {
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          await ensureUserDocExists(userCredential.user);
+          closeAuthModal();
+          window.location.href = "https://mygame-creator.github.io/vip-members/?v=2.0";
+        } else if (mode === 'reset') {
+          await sendPasswordResetEmail(auth, email);
+          alert('Password reset link sent to your email!');
+          closeAuthModal();
+        }
+      } catch (error) {
+        alert('Authentication Error: ' + error.message);
+      }
+    };
 
-        body, html {
-            min-height: 100vh;
-            font-family: 'DM Sans', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            transition: background 0.35s, color 0.35s;
-        }
+    window.handleSignOut = function() {
+      signOut(auth).then(() => {
+        alert('Signed out successfully.');
+      });
+    };
 
-        .header {
-            position: relative;
-            width: 100%;
-            padding: 44px 20px 36px;
-            text-align: center;
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--card-border);
-            margin-bottom: 40px;
-            box-shadow: 0 2px 16px var(--shadow);
-        }
-        .header-eyebrow {
-            font-weight: 400; letter-spacing: 6px; font-size: 11px;
-            text-transform: uppercase; color: var(--gold); margin-bottom: 10px;
-        }
-        .header h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 34px; letter-spacing: 2px;
-            color: var(--text); padding: 0 60px;
-        }
-        .gold-divider {
-            width: 50px; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            margin: 14px auto 0;
-        }
+    // Auth State Tracker (Loop Fix: No auto-redirect on load)
+    onAuthStateChanged(auth, async (user) => {
+      const authButtons = document.querySelectorAll('.auth-btns-group');
+      if (user) {
+        await ensureUserDocExists(user);
+        authButtons.forEach(el => {
+          el.innerHTML = `
+            <a href="https://mygame-creator.github.io/vip-members/?v=2.0" class="btn-g" style="padding:7px 18px;font-size:11px;">VIP Area</a>
+            <button onclick="handleSignOut()" class="btn-o" style="padding:7px 18px;font-size:11px;">Logout</button>
+          `;
+        });
+      } else {
+        authButtons.forEach(el => {
+          el.innerHTML = `
+            <a href="https://sites.google.com/view/mygamehelp" target="_top" class="btn-q" style="padding:7px 14px;font-size:11px;">Help</a>
+            <button onclick="openAuthModal('login')" class="btn-o" style="padding:7px 18px;font-size:11px;">Login</button>
+            <button onclick="openAuthModal('register')" class="btn-g" style="padding:7px 18px;font-size:11px;">Register</button>
+          `;
+        });
+      }
+    });
+  </script>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Mygame Scratch",
+    "alternateName": ["Mygame", "mygamescratch"],
+    "url": "https://mygamescratch.vercel.app/",
+    "keywords": "mygame, mygamescratch, scratch, mygamescratch.vercel.app, games, Akshat",
+    "author": {
+      "@type": "Person",
+      "name": "Akshat",
+      "jobTitle": "Creator & Lead Developer",
+      "url": "https://github.com/mygame-creator",
+      "sameAs": [
+        "https://github.com/mygame-creator"
+      ],
+      "description": "Akshat is the founder and web developer behind Mygame Scratch, creating interactive web games and online player experiences."
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Akshat",
+      "url": "https://github.com/mygame-creator"
+    }
+  }
+  </script>
 
-        .settings-container { position: absolute; top: 38px; right: 38px; z-index: 10000; }
-        .settings-btn {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 50%; cursor: pointer; outline: none;
-            padding: 99px; display: flex; align-items: center; justify-content: center;
-            padding: 9px;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .settings-btn:hover { border-color: var(--gold); box-shadow: 0 0 12px rgba(200,169,90,0.2); }
-        .settings-btn svg { fill: var(--text); width: 22px; height: 22px; transition: transform 0.4s ease; }
-        .settings-btn:hover svg { transform: rotate(90deg); }
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --gold: #c29d4c;
+      --gold-light: #d4b060;
+      --gold-dim: rgba(194,157,76,0.15);
+      --dark: #0a0a0a;
+      --dark2: #111;
+      --text: #ffffff;
+      --text-muted: rgba(255,255,255,0.42);
+    }
+    body { background:var(--dark); font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:var(--text); overflow-x:hidden; }
 
-        .dropdown {
-            display: none; position: absolute; top: 52px; right: 0;
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 10px; box-shadow: 0 8px 30px var(--shadow);
-            flex-direction: column; overflow: hidden; min-width: 190px;
-        }
-        .dropdown.show { display: flex; animation: dropIn 0.18s ease; }
-        @keyframes dropIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
-        .dropdown-label { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--subtext); padding:12px 18px 6px; font-weight:500; }
-        .dropdown button {
-            background: none; border: none; padding: 11px 18px;
-            color: var(--text); cursor: pointer; font-size: 14px;
-            font-family: 'DM Sans', sans-serif; text-align: left;
-            transition: background 0.15s; width: 100%;
-        }
-        .dropdown button:hover { background: var(--inst-bg); }
-        .dropdown-sep { height: 1px; background: var(--card-border); margin: 6px 0; }
-        .dropdown button.logout { color: var(--accent); font-weight: 500; }
-        .dropdown button.logout:hover { background: rgba(224,92,0,0.08); }
-        .dropdown button.delete { color: #dc2626; font-weight: 500; }
-        .dropdown button.delete:hover { background: rgba(220,38,38,0.08); }
+    #auth-modal {
+      position:fixed; inset:0; z-index:200;
+      display:none; align-items:center; justify-content:center;
+      background:rgba(0,0,0,0.85); backdrop-filter:blur(8px);
+    }
+    .modal-box {
+      background:var(--dark2); border:1px solid rgba(194,157,76,0.3);
+      padding:36px; border-radius:8px; width:100%; max-width:400px;
+      position:relative; box-shadow:0 0 40px rgba(0,0,0,0.8);
+    }
+    .close-modal {
+      position:absolute; top:14px; right:18px; color:var(--text-muted);
+      font-size:20px; cursor:pointer; background:none; border:none;
+    }
+    .modal-title { font-size:20px; font-weight:800; color:var(--gold); letter-spacing:2px; margin-bottom:20px; text-align:center; }
+    .form-group { margin-bottom:16px; }
+    .form-group label { display:block; font-size:11px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
+    .form-group input {
+      width:100%; padding:10px 14px; background:rgba(255,255,255,0.05);
+      border:1px solid rgba(194,157,76,0.25); border-radius:4px;
+      color:#fff; font-size:14px; outline:none; transition:border-color .2s;
+    }
+    .form-group input:focus { border-color:var(--gold); }
+    .modal-links { display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom:16px; }
+    .modal-links a { color:var(--gold); text-decoration:none; cursor:pointer; }
+    .modal-links a:hover { text-decoration:underline; }
 
-        .game-container {
-            display: flex; flex-direction: column; gap: 40px;
-            align-items: center; padding: 0 20px 100px;
-            width: 100%; max-width: 580px; margin: 0 auto;
-        }
+    .divider {
+      display:flex; align-items:center; text-align:center;
+      margin:16px 0; color:var(--text-muted); font-size:11px; letter-spacing:1px;
+    }
+    .divider::before, .divider::after {
+      content:''; flex:1; border-bottom:1px solid rgba(255,255,255,0.1);
+    }
+    .divider::before { margin-right:10px; }
+    .divider::after { margin-left:10px; }
 
-        .game-card {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 16px; overflow: hidden; width: 100%;
-            box-shadow: 0 4px 24px var(--shadow); transition: transform 0.25s, box-shadow 0.25s;
-        }
-        .game-card:hover { transform: translateY(-3px); box-shadow: 0 12px 36px var(--shadow); }
+    .btn-google {
+      width:100%; padding:10px; background:#ffffff; color:#000000;
+      border:none; border-radius:4px; font-size:12px; font-weight:700;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      gap:10px; transition:background .2s;
+    }
+    .btn-google:hover { background:#e6e6e6; }
 
-        .game-header {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 16px 20px 14px; border-bottom: 1px solid var(--card-border);
-        }
-        .game-header-left { display: flex; align-items: center; gap: 10px; }
-        .game-dot { width:8px; height:8px; border-radius:50%; background:var(--gold); flex-shrink:0; }
-        .game-title { font-family:'Playfair Display',serif; font-size:17px; color:var(--text); }
-        .game-badge {
-            font-size: 11px; font-weight: 500; letter-spacing: 1px;
-            text-transform: uppercase; padding: 4px 10px; border-radius: 20px;
-            background: var(--badge-bg); color: var(--badge-text);
-        }
+    #cd-screen {
+      position:fixed; inset:0; z-index:100;
+      display:flex; align-items:center; justify-content:center;
+      flex-direction:column; background:var(--dark);
+      transition:opacity 0.9s ease, transform 0.9s ease;
+    }
+    #cd-screen.hide { opacity:0; pointer-events:none; transform:scale(1.05); }
 
-        .game-iframe-wrap { width:100%; aspect-ratio:485/402; background:#000; }
-        .game-iframe-wrap iframe { width:100%; height:100%; border:none; display:block; }
+    .grid-bg {
+      position:absolute; inset:0;
+      background-image:
+        linear-gradient(rgba(194,157,76,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(194,157,76,0.05) 1px, transparent 1px);
+      background-size:48px 48px;
+    }
+    .glow {
+      position:absolute; width:520px; height:520px; border-radius:50%;
+      background:radial-gradient(circle, rgba(194,157,76,0.1) 0%, transparent 68%);
+      top:50%; left:50%; transform:translate(-50%,-50%);
+      animation:pulse 3.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100%{opacity:0.5;transform:translate(-50%,-50%) scale(1)}
+      50%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}
+    }
 
-        .instructions {
-            padding: 14px 20px; color: var(--inst-text); font-size: 13.5px;
-            line-height: 1.6; border-top: 1px solid var(--card-border);
-            background: var(--inst-bg);
-        }
-        .instructions strong { color: var(--gold); }
-        .credits {
-            padding: 8px 20px 12px;
-            font-size: 12.5px;
-            color: var(--subtext);
-            border-top: 1px solid var(--card-border);
-            background: var(--inst-bg);
-        }
-        .credits strong { color: var(--text); }
-        .platform-badge {
-            font-size: 11px; font-weight: 500; padding: 4px 10px;
-            border-radius: 20px; white-space: nowrap;
-        }
-        .mobile-ok { background: #dcfce7; color: #15803d; }
-        .desktop-only { background: #fef9c3; color: #854d0e; }
+    .cd-inner { position:relative; z-index:2; text-align:center; padding:0 24px; }
+    .badge {
+      display:inline-block;
+      background:var(--gold-dim); border:1px solid rgba(194,157,76,0.4);
+      color:var(--gold); font-size:11px; font-weight:700; letter-spacing:3px;
+      text-transform:uppercase; padding:6px 20px; border-radius:100px; margin-bottom:28px;
+    }
+    .big-title {
+      font-size:clamp(54px,11vw,90px); font-weight:900;
+      letter-spacing:14px; line-height:1;
+      text-shadow:0 0 70px rgba(194,157,76,0.2);
+    }
+    .gold-bar { width:72px; height:3px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin:18px auto 14px; }
+    .sub { color:var(--text-muted); font-size:12px; letter-spacing:2.5px; text-transform:uppercase; margin-bottom:44px; }
 
-        @media (max-width: 540px) {
-            .header h1 { font-size: 22px; padding: 0 50px; }
-            .settings-container { top: 14px; right: 14px; }
-            .game-badge { display: none; }
-        }
+    .cd-nums { display:flex; gap:18px; align-items:center; justify-content:center; margin-bottom:50px; }
+    .cd-box { display:flex; flex-direction:column; align-items:center; gap:8px; }
+    .cd-num {
+      width:70px; height:70px; display:flex; align-items:center; justify-content:center;
+      background:rgba(255,255,255,0.04); border:1px solid rgba(194,157,76,0.28);
+      border-radius:8px; font-size:30px; font-weight:800; font-variant-numeric:tabular-nums;
+    }
+    .cd-lbl { font-size:10px; color:rgba(194,157,76,0.65); letter-spacing:1.5px; text-transform:uppercase; }
+    .cd-col { font-size:26px; color:rgba(194,157,76,0.35); font-weight:200; margin-top:22px; }
 
-        .thankyou {
-            width: 100%;
-            max-width: 580px;
-            margin: 0 auto;
-            padding: 0 20px 80px;
-        }
-        .thankyou-inner {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 40px 32px;
-            text-align: center;
-            box-shadow: 0 4px 24px var(--shadow);
-            position: relative;
-            overflow: hidden;
-        }
-        .thankyou-inner::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-        }
-        .thankyou-icon {
-            font-size: 40px;
-            margin-bottom: 16px;
-        }
-        .thankyou-inner h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 22px;
-            color: var(--text);
-            margin-bottom: 14px;
-            letter-spacing: 0.5px;
-        }
-        .thankyou-divider {
-            width: 40px; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            margin: 0 auto 18px;
-        }
-        .thankyou-inner p {
-            font-size: 14.5px;
-            line-height: 1.8;
-            color: var(--inst-text);
-            max-width: 420px;
-            margin: 0 auto 20px;
-        }
-        .thankyou-tag {
-            font-size: 13px;
-            color: var(--gold);
-            font-style: italic;
-            font-weight: 500;
-        }
-    </style>
+    .live-msg { display:none; font-size:20px; font-weight:700; color:var(--gold); letter-spacing:3px; text-transform:uppercase; margin-bottom:36px; animation:pop 0.5s ease both; }
+    @keyframes pop { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
+
+    .btn-row { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; align-items:center; }
+    .btn-g { background:var(--gold); color:#0a0a0a; padding:13px 30px; border-radius:4px; font-size:13px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; text-decoration:none; border:none; cursor:pointer; transition:background .2s,transform .15s; display:inline-block; }
+    .btn-g:hover { background:var(--gold-light); transform:translateY(-1px); }
+    .btn-o { background:transparent; color:var(--gold); padding:12px 28px; border-radius:4px; font-size:13px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; text-decoration:none; border:1px solid var(--gold); cursor:pointer; transition:background .2s,transform .15s; display:inline-block; }
+    .btn-o:hover { background:var(--gold-dim); transform:translateY(-1px); }
+    .btn-q { background:transparent; color:var(--text-muted); padding:12px 18px; border-radius:4px; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; text-decoration:none; border:1px solid rgba(255,255,255,0.14); cursor:pointer; transition:all .2s; display:inline-block; }
+    .btn-q:hover { border-color:rgba(255,255,255,0.32); color:rgba(255,255,255,0.75); transform:translateY(-1px); }
+
+    #homepage { display:none; opacity:0; transition:opacity 0.9s ease 0.2s; }
+    #homepage.show { display:block; opacity:1; }
+
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:50;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:16px 40px;
+      background:rgba(10,10,10,0.88);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid rgba(194,157,76,0.08);
+    }
+    .nav-logo { font-size:18px; font-weight:900; letter-spacing:6px; text-decoration:none; color:var(--text); }
+    .nav-logo span { color:var(--gold); }
+    .nav-links { display:flex; gap:12px; align-items:center; }
+    .nav-links a.nav-item { color:var(--text-muted); text-decoration:none; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; transition:color .2s; }
+    .nav-links a.nav-item:hover { color:var(--gold); }
+
+    .hero {
+      min-height:100vh;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      text-align:center; padding:120px 24px 100px;
+      position:relative; overflow:hidden;
+      background:var(--dark);
+    }
+    .hero-badge {
+      display:inline-flex; align-items:center; gap:8px;
+      background:var(--gold-dim); border:1px solid rgba(194,157,76,0.3);
+      color:var(--gold); font-size:11px; font-weight:700; letter-spacing:2.5px;
+      text-transform:uppercase; padding:6px 18px; border-radius:100px; margin-bottom:32px;
+    }
+    .dot { width:7px; height:7px; border-radius:50%; background:var(--gold); animation:blink 1.3s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+
+    .hero-title { font-size:clamp(66px,13vw,108px); font-weight:900; letter-spacing:16px; line-height:1; text-shadow:0 0 100px rgba(194,157,76,0.18); position:relative; z-index:2; }
+    .hero-sub { color:var(--text-muted); font-size:13px; letter-spacing:3px; text-transform:uppercase; margin:22px 0 44px; position:relative; z-index:2; }
+    .hero-btns { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; position:relative; z-index:2; }
+
+    .stats {
+      border-top:1px solid rgba(194,157,76,0.08);
+      border-bottom:1px solid rgba(194,157,76,0.08);
+      background:rgba(194,157,76,0.03);
+      display:flex; justify-content:center; flex-wrap:wrap;
+    }
+    .stat-item {
+      flex:1; min-width:160px; max-width:260px;
+      text-align:center; padding:36px 24px;
+      border-right:1px solid rgba(194,157,76,0.08);
+    }
+    .stat-item:last-child { border-right:none; }
+    .stat-num { font-size:36px; font-weight:900; color:var(--gold); letter-spacing:2px; }
+    .stat-lbl { font-size:11px; color:var(--text-muted); letter-spacing:2px; text-transform:uppercase; margin-top:6px; }
+
+    .about-section {
+      padding:100px 24px;
+      background:var(--dark);
+      border-bottom:1px solid rgba(194,157,76,0.08);
+      text-align:center;
+      position:relative;
+    }
+    .about-container { max-width:680px; margin:0 auto; position:relative; z-index:2; }
+    .about-label { color:var(--gold); font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:12px; }
+    .about-title { font-size:clamp(26px,4vw,38px); font-weight:800; letter-spacing:3px; margin-bottom:16px; }
+    .about-bio { color:var(--text-muted); font-size:15px; line-height:1.8; margin-bottom:24px; }
+    .about-link { color:var(--gold); text-decoration:none; font-weight:700; border-bottom:1px solid var(--gold); padding-bottom:2px; transition:opacity .2s; }
+    .about-link:hover { opacity:0.8; }
+
+    .cta-section {
+      display:flex; flex-direction:column; align-items:center;
+      text-align:center; padding:100px 24px;
+      position:relative; overflow:hidden;
+      background:var(--dark2);
+    }
+    .cta-glow {
+      position:absolute; width:400px; height:400px; border-radius:50%;
+      background:radial-gradient(circle, rgba(194,157,76,0.07) 0%, transparent 70%);
+      top:50%; left:50%; transform:translate(-50%,-50%);
+    }
+    .cta-label { color:var(--gold); font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:16px; position:relative; z-index:2; }
+    .cta-title { font-size:clamp(28px,5vw,48px); font-weight:900; letter-spacing:4px; margin-bottom:16px; position:relative; z-index:2; }
+    .cta-desc { color:var(--text-muted); font-size:14px; line-height:1.7; max-width:440px; margin:0 auto 40px; position:relative; z-index:2; }
+    .cta-btns { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; position:relative; z-index:2; }
+
+    footer {
+      border-top:1px solid rgba(194,157,76,0.08);
+      padding:28px 40px;
+      display:flex; justify-content:space-between; align-items:center;
+      flex-wrap:wrap; gap:14px;
+      background:rgba(0,0,0,0.3);
+    }
+    .footer-logo { font-size:16px; font-weight:900; letter-spacing:6px; }
+    .footer-logo span { color:var(--gold); }
+    .footer-copy { font-size:12px; color:var(--text-muted); letter-spacing:1px; }
+    .footer-links { display:flex; gap:20px; }
+    .footer-links a { color:var(--text-muted); text-decoration:none; font-size:12px; letter-spacing:1px; transition:color .2s; }
+    .footer-links a:hover { color:var(--gold); }
+
+    @media (max-width:600px) {
+      nav { padding:14px 20px; }
+      .nav-links .btn-q { display:none; }
+      footer { flex-direction:column; align-items:center; text-align:center; }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="settings-container">
-            <button class="settings-btn" onclick="toggleSettings()" title="Settings">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58
-                    c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96
-                    c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84
-                    c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33
-                    c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58
-                    C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61
-                    l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54
-                    c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54
-                    c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32
-                    c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z
-                    M12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
-                </svg>
-            </button>
-            <div class="dropdown" id="themeDropdown">
-                <div class="dropdown-label">Theme</div>
-                <button onclick="setTheme('system')">⚙️ System Default</button>
-                <button onclick="setTheme('dark')">🌙 Dark Mode</button>
-                <button onclick="setTheme('light')">☀️ Light Mode</button>
-                <div class="dropdown-sep"></div>
-                <button class="logout" onclick="handleFirebaseLogout()">🚪 Logout</button>
-                <button class="delete" onclick="handleFirebaseDeleteAccount()">⚠️ Delete Account</button>
-            </div>
-        </div>
-        <div class="header-eyebrow">Exclusive Access</div>
-        <h1>VIP Members Area</h1>
-        <div class="gold-divider"></div>
+<div id="auth-modal">
+  <div class="modal-box">
+    <button class="close-modal" onclick="closeAuthModal()">✕</button>
+    <div class="modal-title" id="auth-title">Account</div>
+    
+    <button type="button" class="btn-google" onclick="handleGoogleSignIn()">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+      Continue with Google
+    </button>
+
+    <div class="divider">OR</div>
+
+    <form id="auth-form" onsubmit="handleAuthForm(event)">
+      <input type="hidden" id="auth-mode" value="login">
+      
+      <div class="form-group" id="username-group" style="display:none;">
+        <label>Username</label>
+        <input type="text" id="auth-username" placeholder="PlayerName">
+      </div>
+      
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="auth-email" required placeholder="player@example.com">
+      </div>
+      
+      <div class="form-group" id="password-group">
+        <label>Password</label>
+        <input type="password" id="auth-password" placeholder="••••••••">
+      </div>
+
+      <div class="modal-links">
+        <a id="forgot-link" onclick="openAuthModal('reset')">Forgot Password?</a>
+      </div>
+
+      <button type="submit" id="auth-submit-btn" class="btn-g" style="width:100%;padding:12px;margin-top:10px;">Submit</button>
+    </form>
+  </div>
+</div>
+
+<div id="cd-screen">
+  <div class="grid-bg"></div>
+  <div class="glow"></div>
+  <div class="cd-inner">
+    <div class="badge">🚀 Launch Day</div>
+    <div class="big-title">Mygame</div>
+    <div class="gold-bar"></div>
+    <div class="sub">The game begins now</div>
+    <div class="cd-nums" id="cd-nums">
+      <div class="cd-box"><div class="cd-num" id="cd-h">00</div><div class="cd-lbl">Hours</div></div>
+      <div class="cd-col">:</div>
+      <div class="cd-box"><div class="cd-num" id="cd-m">00</div><div class="cd-lbl">Mins</div></div>
+      <div class="cd-col">:</div>
+      <div class="cd-box"><div class="cd-num" id="cd-s">00</div><div class="cd-lbl">Secs</div></div>
     </div>
-
-    <div class="game-container">
-        <!-- Car Game -->
-        <div class="game-card">
-            <div class="game-header">
-                <div class="game-header-left">
-                    <div class="game-dot"></div>
-                    <div class="game-title">Car Game</div>
-                </div>
-                <span class="game-badge">Sports & Racing</span>
-                <span class="platform-badge mobile-ok">📱 Mobile & Desktop</span>
-            </div>
-            <div class="game-iframe-wrap">
-                <iframe src="https://scratch.mit.edu/projects/1131358274/embed" allowtransparency="true" scrolling="no" allowfullscreen></iframe>
-            </div>
-            <div class="instructions">
-                <strong>How to play:</strong> Use the <strong>Arrow Keys</strong> to steer your car. Avoid obstacles and try to survive as long as possible!
-            </div>
-        </div>
-
-        <!-- Geometry Dash -->
-        <div class="game-card">
-            <div class="game-header">
-                <div class="game-header-left">
-                    <div class="game-dot"></div>
-                    <div class="game-title">Geometry Dash</div>
-                </div>
-                <span class="game-badge">Rhythm</span>
-                <span class="platform-badge mobile-ok">📱 Mobile & Desktop</span>
-            </div>
-            <div class="game-iframe-wrap">
-                <iframe src="https://scratch.mit.edu/projects/1054432158/embed" allowtransparency="true" scrolling="no" allowfullscreen></iframe>
-            </div>
-            <div class="instructions">
-                <strong>How to play:</strong> Press <strong>Space</strong> or click to jump. Time your jumps to the beat and avoid the spikes!
-            </div>
-            <div class="credits">🎮 Created by <strong>griffpatch</strong></div>
-        </div>
-
-        <!-- Slither.io -->
-        <div class="game-card">
-            <div class="game-header">
-                <div class="game-header-left">
-                    <div class="game-dot"></div>
-                    <div class="game-title">Slither.io</div>
-                </div>
-                <span class="game-badge">Arcade</span>
-                <span class="platform-badge mobile-ok">📱 Mobile & Desktop</span>
-            </div>
-            <div class="game-iframe-wrap">
-                <iframe src="https://scratch.mit.edu/projects/108566337/embed" allowtransparency="true" scrolling="no" allowfullscreen></iframe>
-            </div>
-            <div class="instructions">
-                <strong>How to play:</strong> Move your mouse to control your snake. Eat the glowing dots to grow bigger!
-            </div>
-            <div class="credits">🎮 Created by <strong>griffpatch</strong></div>
-        </div>
-
-        <!-- Flappy Bird -->
-        <div class="game-card">
-            <div class="game-header">
-                <div class="game-header-left">
-                    <div class="game-dot"></div>
-                    <div class="game-title">Flappy Bird</div>
-                </div>
-                <span class="game-badge">Arcade</span>
-                <span class="platform-badge mobile-ok">📱 Mobile & Desktop</span>
-            </div>
-            <div class="game-iframe-wrap">
-                <iframe src="https://scratch.mit.edu/projects/17828009/embed" allowtransparency="true" scrolling="no" allowfullscreen></iframe>
-            </div>
-            <div class="instructions">
-                <strong>How to play:</strong> Tap the screen or press <strong>Space</strong> to flap through the pipes!
-            </div>
-            <div class="credits">🎮 Created by <strong>HYPERPIXEL_2015</strong></div>
-        </div>
-
-        <!-- Paper Minecraft -->
-        <div class="game-card">
-            <div class="game-header">
-                <div class="game-header-left">
-                    <div class="game-dot"></div>
-                    <div class="game-title">Paper Minecraft</div>
-                </div>
-                <span class="game-badge">Sandbox</span>
-                <span class="platform-badge desktop-only">🖥️ Desktop Only</span>
-            </div>
-            <div class="game-iframe-wrap">
-                <iframe src="https://scratch.mit.edu/projects/45962536/embed" allowtransparency="true" scrolling="no" allowfullscreen></iframe>
-            </div>
-            <div class="instructions">
-                <strong>How to play:</strong> Use <strong>WASD</strong> to move, <strong>Mouse</strong> to dig or place blocks, and <strong>E</strong> for inventory.
-            </div>
-            <div class="credits">🎮 Created by <strong>griffpatch</strong></div>
-        </div>
-
-        <!-- Epic Ninja -->
-        <div class="game-card">
-            <div class="game-header">
-                <div class="game-header-left">
-                    <div class="game-dot"></div>
-                    <div class="game-title">Epic Ninja</div>
-                </div>
-                <span class="game-badge">Platformer</span>
-                <span class="platform-badge desktop-only">🖥️ Desktop Only</span>
-            </div>
-            <div class="game-iframe-wrap">
-                <iframe src="https://scratch.mit.edu/projects/21554369/embed" allowtransparency="true" scrolling="no" allowfullscreen></iframe>
-            </div>
-            <div class="instructions">
-                <strong>How to play:</strong> Use <strong>Arrow Keys</strong> to move and <strong>Space</strong> to throw shurikens.
-            </div>
-            <div class="credits">🎮 Created by <strong>griffpatch</strong></div>
-        </div>
-
-        <!-- Appel -->
-        <div class="game-card">
-            <div class="game-header">
-                <div class="game-header-left">
-                    <div class="game-dot"></div>
-                    <div class="game-title">Appel</div>
-                </div>
-                <span class="game-badge">Platformer</span>
-                <span class="platform-badge desktop-only">🖥️ Desktop Only</span>
-            </div>
-            <div class="game-iframe-wrap">
-                <iframe src="https://scratch.mit.edu/projects/60917032/embed" allowtransparency="true" scrolling="no" allowfullscreen></iframe>
-            </div>
-            <div class="instructions">
-                <strong>How to play:</strong> Use <strong>Arrow Keys</strong> or <strong>WASD</strong> to run, jump, and wall jump!
-            </div>
-            <div class="credits">🎮 Created by <strong>griffpatch</strong></div>
-        </div>
-
-        <!-- Terraria -->
-        <div class="game-card">
-            <div class="game-header">
-                <div class="game-header-left">
-                    <div class="game-dot"></div>
-                    <div class="game-title">Terraria</div>
-                </div>
-                <span class="game-badge">Sandbox</span>
-                <span class="platform-badge desktop-only">🖥️ Desktop Only</span>
-            </div>
-            <div class="game-iframe-wrap">
-                <iframe src="https://scratch.mit.edu/projects/322341152/embed" allowtransparency="true" scrolling="no" allowfullscreen></iframe>
-            </div>
-            <div class="instructions">
-                <strong>How to play:</strong> Use <strong>WASD</strong> to move and <strong>Mouse</strong> to mine and build.
-            </div>
-            <div class="credits">🎮 Created by <strong>griffpatch</strong></div>
-        </div>
+    <div class="live-msg" id="live-msg">🎮 We Are Live!</div>
+    <div class="btn-row auth-btns-group">
+      <button onclick="openAuthModal('register')" class="btn-g">Register Now</button>
+      <button onclick="openAuthModal('login')" class="btn-o">Login</button>
+      <a href="https://sites.google.com/view/mygamehelp" target="_top" class="btn-q">Help</a>
     </div>
+  </div>
+</div>
 
-    <div class="thankyou">
-        <div class="thankyou-inner">
-            <div class="thankyou-icon">👑</div>
-            <h2>Thank You for Being a VIP Member</h2>
-            <div class="thankyou-divider"></div>
-            <p>You're part of an exclusive group that gets access to the best games, early updates, and so much more. We appreciate your support!</p>
-            <div class="thankyou-tag">— The VIP Members Team</div>
-        </div>
+<div id="homepage">
+  <nav>
+    <a href="#" class="nav-logo">My<span>game</span></a>
+    <div class="nav-links">
+      <a href="#about" class="nav-item">About Developer</a>
+      <div class="auth-btns-group" style="display:inline-flex; gap:8px;">
+        <a href="https://sites.google.com/view/mygamehelp" target="_top" class="btn-q" style="padding:7px 14px;font-size:11px;">Help</a>
+        <button onclick="openAuthModal('login')" class="btn-o" style="padding:7px 18px;font-size:11px;">Login</button>
+        <button onclick="openAuthModal('register')" class="btn-g" style="padding:7px 18px;font-size:11px;">Register</button>
+      </div>
     </div>
+  </nav>
 
-    <script>
-        const dropdown = document.getElementById('themeDropdown');
-        function toggleSettings() { dropdown.classList.toggle('show'); }
-        window.onclick = function(e) {
-            if (!e.target.closest('.settings-container')) dropdown.classList.remove('show');
-        };
-        function setTheme(mode) {
-            if (mode === 'system') {
-                document.documentElement.classList.toggle('light-mode',
-                    window.matchMedia('(prefers-color-scheme: light)').matches);
-            } else {
-                document.documentElement.classList.toggle('light-mode', mode === 'light');
-            }
-            try { localStorage.setItem('mygame_theme', mode); } catch(e) {}
-            dropdown.classList.remove('show');
-        }
-    </script>
+  <section class="hero">
+    <div class="grid-bg"></div>
+    <div class="glow"></div>
+    <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;">
+      <div class="hero-badge"><div class="dot"></div> Now Live</div>
+      <div class="hero-title">Mygame</div>
+      <div class="gold-bar" style="width:80px;height:3px;margin:20px auto 0;"></div>
+      <div class="hero-sub">Play. Compete. Win.</div>
+      <div class="hero-btns">
+        <button onclick="openAuthModal('register')" class="btn-g" style="padding:15px 38px;font-size:14px;">Start Playing</button>
+        <button onclick="openAuthModal('login')" class="btn-o" style="padding:14px 34px;font-size:14px;">Login</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="stat-item"><div class="stat-num">100+</div><div class="stat-lbl">Players</div></div>
+    <div class="stat-item"><div class="stat-num">24/7</div><div class="stat-lbl">Online</div></div>
+    <div class="stat-item"><div class="stat-num">Free</div><div class="stat-lbl">To Play</div></div>
+  </div>
+
+  <section class="about-section" id="about">
+    <div class="about-container">
+      <div class="about-label">Creator Profile</div>
+      <h2 class="about-title">About the Developer</h2>
+      <div class="gold-bar" style="width:50px;height:2px;margin:0 auto 20px;"></div>
+      <p class="about-bio">
+        <strong>Mygame Scratch</strong> was created and developed by <strong>Akshat</strong>. Akshat is a web developer dedicated to building high-performance web applications, interactive web experiences, and curated online games. 
+      </p>
+      <a href="https://github.com/mygame-creator" target="_blank" class="about-link">View Akshat's GitHub Profile →</a>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="cta-glow"></div>
+    <div class="cta-label">Ready?</div>
+    <div class="cta-title">Join the Game</div>
+    <div class="gold-bar" style="width:60px;height:2px;margin:0 auto 24px;"></div>
+    <div class="cta-desc">Create your free account and jump in. It only takes seconds to get started.</div>
+    <div class="cta-btns">
+      <button onclick="openAuthModal('register')" class="btn-g" style="padding:14px 36px;font-size:13px;">Create Account</button>
+      <a href="https://sites.google.com/view/mygamehelp" target="_top" class="btn-q" style="padding:13px 24px;">Need Help?</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-logo">My<span>game</span></div>
+    <div class="footer-copy">© 2026 Mygame Scratch · Created by Akshat</div>
+    <div class="footer-links">
+      <a href="#about">About Creator</a>
+      <a href="https://sites.google.com/view/mygamehelp" target="_top">Help</a>
+      <a onclick="openAuthModal('register')" style="color:var(--gold);cursor:pointer;">Register</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+  var launch = new Date('2026-06-28T12:30:00+05:30');
+  var revealed = false;
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  function reveal() {
+    if (revealed) return;
+    revealed = true;
+    document.getElementById('cd-nums').style.display = 'none';
+    document.getElementById('live-msg').style.display = 'block';
+    setTimeout(function(){
+      document.getElementById('cd-screen').classList.add('hide');
+      var hp = document.getElementById('homepage');
+      hp.style.display = 'block';
+      setTimeout(function(){ hp.classList.add('show'); }, 60);
+    }, 1800);
+  }
+
+  function tick(){
+    var diff = launch - Date.now();
+    if (diff <= 0){ reveal(); return; }
+    document.getElementById('cd-h').textContent = pad(Math.floor(diff/3600000));
+    document.getElementById('cd-m').textContent = pad(Math.floor((diff%3600000)/60000));
+    document.getElementById('cd-s').textContent = pad(Math.floor((diff%60000)/1000));
+  }
+  tick();
+  setInterval(tick, 1000);
+</script>
+
 </body>
 </html>
