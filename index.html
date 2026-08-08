@@ -53,14 +53,12 @@
       measurementId: "G-K8RS2L4P3V"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const googleProvider = new GoogleAuthProvider();
 
-    // Helper: Ensure Firestore Document Exists
     async function ensureUserDocExists(user, username = null) {
       const userRef = doc(db, "users", user.uid);
       const docSnap = await getDoc(userRef);
@@ -74,19 +72,17 @@
       }
     }
 
-    // Google Sign-In Handler
     window.handleGoogleSignIn = async function() {
       try {
         const result = await signInWithPopup(auth, googleProvider);
         await ensureUserDocExists(result.user);
         closeAuthModal();
-        window.location.href = "https://mygame-creator.github.io/vip-members/";
+        window.location.href = "https://mygame-creator.github.io/vip-members/?v=2.0";
       } catch (error) {
         alert('Google Sign-In Error: ' + error.message);
       }
     };
 
-    // Modal UI Handlers
     window.openAuthModal = function(mode) {
       const modal = document.getElementById('auth-modal');
       const title = document.getElementById('auth-title');
@@ -120,7 +116,6 @@
       document.getElementById('auth-form').reset();
     };
 
-    // Auth Form Action Handler
     window.handleAuthForm = async function(e) {
       e.preventDefault();
       const mode = document.getElementById('auth-mode').value;
@@ -133,12 +128,12 @@
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           await ensureUserDocExists(userCredential.user, username);
           closeAuthModal();
-          window.location.href = "https://mygame-creator.github.io/vip-members/";
+          window.location.href = "https://mygame-creator.github.io/vip-members/?v=2.0";
         } else if (mode === 'login') {
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
           await ensureUserDocExists(userCredential.user);
           closeAuthModal();
-          window.location.href = "https://mygame-creator.github.io/vip-members/";
+          window.location.href = "https://mygame-creator.github.io/vip-members/?v=2.0";
         } else if (mode === 'reset') {
           await sendPasswordResetEmail(auth, email);
           alert('Password reset link sent to your email!');
@@ -155,12 +150,17 @@
       });
     };
 
-    // Track User Auth State & Automatic VIP Redirect
+    // Auth State Tracker (Loop Fix: No auto-redirect on load)
     onAuthStateChanged(auth, async (user) => {
       const authButtons = document.querySelectorAll('.auth-btns-group');
       if (user) {
         await ensureUserDocExists(user);
-        window.location.href = "https://mygame-creator.github.io/vip-members/";
+        authButtons.forEach(el => {
+          el.innerHTML = `
+            <a href="https://mygame-creator.github.io/vip-members/?v=2.0" class="btn-g" style="padding:7px 18px;font-size:11px;">VIP Area</a>
+            <button onclick="handleSignOut()" class="btn-o" style="padding:7px 18px;font-size:11px;">Logout</button>
+          `;
+        });
       } else {
         authButtons.forEach(el => {
           el.innerHTML = `
@@ -173,7 +173,6 @@
     });
   </script>
   
-  <!-- ENHANCED STRUCTURED DATA FOR GOOGLE SEARCH -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -213,7 +212,6 @@
     }
     body { background:var(--dark); font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:var(--text); overflow-x:hidden; }
 
-    /* ── AUTH MODAL ── */
     #auth-modal {
       position:fixed; inset:0; z-index:200;
       display:none; align-items:center; justify-content:center;
@@ -259,7 +257,6 @@
     }
     .btn-google:hover { background:#e6e6e6; }
 
-    /* ── COUNTDOWN ── */
     #cd-screen {
       position:fixed; inset:0; z-index:100;
       display:flex; align-items:center; justify-content:center;
@@ -322,11 +319,9 @@
     .btn-q { background:transparent; color:var(--text-muted); padding:12px 18px; border-radius:4px; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; text-decoration:none; border:1px solid rgba(255,255,255,0.14); cursor:pointer; transition:all .2s; display:inline-block; }
     .btn-q:hover { border-color:rgba(255,255,255,0.32); color:rgba(255,255,255,0.75); transform:translateY(-1px); }
 
-    /* ── HOMEPAGE ── */
     #homepage { display:none; opacity:0; transition:opacity 0.9s ease 0.2s; }
     #homepage.show { display:block; opacity:1; }
 
-    /* NAV */
     nav {
       position:fixed; top:0; left:0; right:0; z-index:50;
       display:flex; justify-content:space-between; align-items:center;
@@ -341,7 +336,6 @@
     .nav-links a.nav-item { color:var(--text-muted); text-decoration:none; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; transition:color .2s; }
     .nav-links a.nav-item:hover { color:var(--gold); }
 
-    /* HERO */
     .hero {
       min-height:100vh;
       display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -362,7 +356,6 @@
     .hero-sub { color:var(--text-muted); font-size:13px; letter-spacing:3px; text-transform:uppercase; margin:22px 0 44px; position:relative; z-index:2; }
     .hero-btns { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; position:relative; z-index:2; }
 
-    /* STATS */
     .stats {
       border-top:1px solid rgba(194,157,76,0.08);
       border-bottom:1px solid rgba(194,157,76,0.08);
@@ -378,7 +371,6 @@
     .stat-num { font-size:36px; font-weight:900; color:var(--gold); letter-spacing:2px; }
     .stat-lbl { font-size:11px; color:var(--text-muted); letter-spacing:2px; text-transform:uppercase; margin-top:6px; }
 
-    /* ── ABOUT CREATOR SECTION ── */
     .about-section {
       padding:100px 24px;
       background:var(--dark);
@@ -393,7 +385,6 @@
     .about-link { color:var(--gold); text-decoration:none; font-weight:700; border-bottom:1px solid var(--gold); padding-bottom:2px; transition:opacity .2s; }
     .about-link:hover { opacity:0.8; }
 
-    /* CTA */
     .cta-section {
       display:flex; flex-direction:column; align-items:center;
       text-align:center; padding:100px 24px;
@@ -410,7 +401,6 @@
     .cta-desc { color:var(--text-muted); font-size:14px; line-height:1.7; max-width:440px; margin:0 auto 40px; position:relative; z-index:2; }
     .cta-btns { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; position:relative; z-index:2; }
 
-    /* FOOTER */
     footer {
       border-top:1px solid rgba(194,157,76,0.08);
       padding:28px 40px;
@@ -434,7 +424,6 @@
 </head>
 <body>
 
-<!-- ══ AUTH MODAL ══ -->
 <div id="auth-modal">
   <div class="modal-box">
     <button class="close-modal" onclick="closeAuthModal()">✕</button>
@@ -474,7 +463,6 @@
   </div>
 </div>
 
-<!-- ══ COUNTDOWN SCREEN ══ -->
 <div id="cd-screen">
   <div class="grid-bg"></div>
   <div class="glow"></div>
@@ -499,7 +487,6 @@
   </div>
 </div>
 
-<!-- ══ HOMEPAGE ══ -->
 <div id="homepage">
   <nav>
     <a href="#" class="nav-logo">My<span>game</span></a>
@@ -534,7 +521,6 @@
     <div class="stat-item"><div class="stat-num">Free</div><div class="stat-lbl">To Play</div></div>
   </div>
 
-  <!-- ── ABOUT SECTION ── -->
   <section class="about-section" id="about">
     <div class="about-container">
       <div class="about-label">Creator Profile</div>
@@ -571,12 +557,7 @@
 </div>
 
 <script>
-  // ════════════════════════════════════════════
-  // SET YOUR LAUNCH DATE HERE
-  // Format: new Date('YYYY-MM-DDTHH:MM:SS')
   var launch = new Date('2026-06-28T12:30:00+05:30');
-  // ════════════════════════════════════════════
-
   var revealed = false;
   function pad(n){ return String(n).padStart(2,'0'); }
 
