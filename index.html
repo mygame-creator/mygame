@@ -79,8 +79,8 @@
       try {
         const result = await signInWithPopup(auth, googleProvider);
         await ensureUserDocExists(result.user);
-        alert('Signed in with Google successfully!');
         closeAuthModal();
+        window.location.href = "https://mygame-creator.github.io/vip-members/";
       } catch (error) {
         alert('Google Sign-In Error: ' + error.message);
       }
@@ -132,13 +132,13 @@
         if (mode === 'register') {
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           await ensureUserDocExists(userCredential.user, username);
-          alert('Account created successfully!');
           closeAuthModal();
+          window.location.href = "https://mygame-creator.github.io/vip-members/";
         } else if (mode === 'login') {
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
           await ensureUserDocExists(userCredential.user);
-          alert('Successfully logged in!');
           closeAuthModal();
+          window.location.href = "https://mygame-creator.github.io/vip-members/";
         } else if (mode === 'reset') {
           await sendPasswordResetEmail(auth, email);
           alert('Password reset link sent to your email!');
@@ -155,17 +155,12 @@
       });
     };
 
-    // Track User Auth State
+    // Track User Auth State & Automatic VIP Redirect
     onAuthStateChanged(auth, async (user) => {
       const authButtons = document.querySelectorAll('.auth-btns-group');
       if (user) {
         await ensureUserDocExists(user);
-        authButtons.forEach(el => {
-          el.innerHTML = `
-            <span style="color:var(--gold);font-size:12px;font-weight:700;letter-spacing:1px;margin-right:8px;">${user.email}</span>
-            <button onclick="handleSignOut()" class="btn-o" style="padding:7px 18px;font-size:11px;">Logout</button>
-          `;
-        });
+        window.location.href = "https://mygame-creator.github.io/vip-members/";
       } else {
         authButtons.forEach(el => {
           el.innerHTML = `
