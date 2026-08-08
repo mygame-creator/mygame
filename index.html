@@ -77,7 +77,7 @@
         const result = await signInWithPopup(auth, googleProvider);
         await ensureUserDocExists(result.user);
         closeAuthModal();
-        window.location.href = "https://mygame-creator.github.io/vip-members/?v=2.0";
+        window.location.href = "https://mygamescratch.vercel.app/vip-area.html";
       } catch (error) {
         alert('Google Sign-In Error: ' + error.message);
       }
@@ -128,12 +128,12 @@
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           await ensureUserDocExists(userCredential.user, username);
           closeAuthModal();
-          window.location.href = "https://mygame-creator.github.io/vip-members/?v=2.0";
+          window.location.href = "https://mygamescratch.vercel.app/vip-area.html";
         } else if (mode === 'login') {
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
           await ensureUserDocExists(userCredential.user);
           closeAuthModal();
-          window.location.href = "https://mygame-creator.github.io/vip-members/?v=2.0";
+          window.location.href = "https://mygamescratch.vercel.app/vip-area.html";
         } else if (mode === 'reset') {
           await sendPasswordResetEmail(auth, email);
           alert('Password reset link sent to your email!');
@@ -157,7 +157,7 @@
         await ensureUserDocExists(user);
         authButtons.forEach(el => {
           el.innerHTML = `
-            <a href="https://mygame-creator.github.io/vip-members/?v=2.0" class="btn-g" style="padding:7px 18px;font-size:11px;">VIP Area</a>
+            <a href="https://mygamescratch.vercel.app/vip-area.html" class="btn-g" style="padding:7px 18px;font-size:11px;">VIP Area</a>
             <button onclick="handleSignOut()" class="btn-o" style="padding:7px 18px;font-size:11px;">Logout</button>
           `;
         });
