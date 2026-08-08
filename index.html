@@ -3,149 +3,519 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyGame Scratch</title>
+    <title>VIP Members Area</title>
+    
+    <!-- ANTI-CACHE META TAGS -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <script>
+        function applyInitialTheme() {
+            let savedTheme = 'system';
+            try { savedTheme = localStorage.getItem('mygame_theme') || 'system'; } catch (e) {}
+            if (savedTheme === 'light' || (savedTheme === 'system' && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+                document.documentElement.classList.add('light-mode');
+            }
+        }
+        applyInitialTheme();
+    </script>
+
+    <!-- FIREBASE INTEGRATION & LOGOUT FIX -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged, 
+            signOut, 
+            deleteUser 
+        } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            deleteDoc 
+        } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCf0Pfa0HOV4ciAVtqwLVNq_gLcCtAAk8Q",
+            authDomain: "mygamescratch.firebaseapp.com",
+            projectId: "mygamescratch",
+            storageBucket: "mygamescratch.firebasestorage.app",
+            messagingSenderId: "256549154945",
+            appId: "1:256549154945:web:aa29c54bf7036cb3f65d80"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Protection Check: Redirect unauthenticated users
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.replace("https://mygamescratch.vercel.app/");
+            }
+        });
+
+        // Fixed Logout Function
+        window.handleFirebaseLogout = function() {
+            signOut(auth).then(() => {
+                window.location.replace("https://mygamescratch.vercel.app/");
+            }).catch((error) => {
+                alert("Error logging out: " + error.message);
+            });
+        };
+
+        // Fixed Delete Account Function
+        window.handleFirebaseDeleteAccount = async function() {
+            const confirmDelete = confirm("Are you sure you want to delete your account? This action cannot be undone.");
+            if (!confirmDelete) return;
+
+            const user = auth.currentUser;
+            if (user) {
+                try {
+                    await deleteDoc(doc(db, "users", user.uid));
+                    await deleteUser(user);
+                    alert("Your account has been deleted.");
+                    window.location.replace("https://mygamescratch.vercel.app/");
+                } catch (error) {
+                    alert("Error deleting account: " + error.message);
+                }
+            }
+        };
+    </script>
+
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #111; color: #fff; }
-        header { display: flex; justify-content: space-between; padding: 20px; background: #222; }
-        .auth-btns-group { display: flex; gap: 10px; }
-        .btn-o { background: #ff4757; color: white; border: none; cursor: pointer; border-radius: 5px; }
-        .btn-g { background: #2ed573; color: white; border: none; cursor: pointer; border-radius: 5px; text-decoration: none; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
-        .modal-content { background: #333; padding: 20px; border-radius: 10px; text-align: center; }
-        input { margin: 10px 0; padding: 10px; width: 90%; }
+        :root {
+            --bg: #0d0d0d;
+            --header-bg: rgba(13,13,13,0.95);
+            --text: #f0ece4;
+            --subtext: #777;
+            --card-bg: #161616;
+            --card-border: #2a2a2a;
+            --shadow: rgba(0,0,0,0.6);
+            --inst-bg: #1a1a1a;
+            --inst-text: #aaaaaa;
+            --gold: #c8a95a;
+            --accent: #e05c00;
+            --badge-bg: #1e1e1e;
+            --badge-text: #888;
+        }
+
+        html.light-mode {
+            --bg: #f2f2f7; 
+            --header-bg: rgba(255, 255, 255, 0.75); 
+            --text: #1c1c1e; 
+            --subtext: #8e8e93;
+            --card-bg: #ffffff; 
+            --card-border: #e5e5ea;
+            --shadow: rgba(0, 0, 0, 0.06); 
+            --inst-bg: #fafafa;
+            --inst-text: #3a3a3c;
+            --gold: #d97706; 
+            --accent: #ff3b30;
+            --badge-bg: #e5e5ea;
+            --badge-text: #1c1c1e;
+        }
+
+        html.light-mode .header {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            min-height: 100vh;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.35s, color 0.35s;
+        }
+
+        .header {
+            position: relative;
+            width: 100%;
+            padding: 44px 20px 36px;
+            text-align: center;
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 40px;
+            box-shadow: 0 2px 16px var(--shadow);
+        }
+        .header-eyebrow {
+            font-weight: 400; letter-spacing: 6px; font-size: 11px;
+            text-transform: uppercase; color: var(--gold); margin-bottom: 10px;
+        }
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 34px; letter-spacing: 2px;
+            color: var(--text); padding: 0 60px;
+        }
+        .gold-divider {
+            width: 50px; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin: 14px auto 0;
+        }
+
+        .settings-container { position: absolute; top: 38px; right: 38px; z-index: 10000; }
+        .settings-btn {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 50%; cursor: pointer; outline: none;
+            padding: 99px; display: flex; align-items: center; justify-content: center;
+            padding: 9px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .settings-btn:hover { border-color: var(--gold); box-shadow: 0 0 12px rgba(200,169,90,0.2); }
+        .settings-btn svg { fill: var(--text); width: 22px; height: 22px; transition: transform 0.4s ease; }
+        .settings-btn:hover svg { transform: rotate(90deg); }
+
+        .dropdown {
+            display: none; position: absolute; top: 52px; right: 0;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 10px; box-shadow: 0 8px 30px var(--shadow);
+            flex-direction: column; overflow: hidden; min-width: 190px;
+        }
+        .dropdown.show { display: flex; animation: dropIn 0.18s ease; }
+        @keyframes dropIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+        .dropdown-label { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--subtext); padding:12px 18px 6px; font-weight:500; }
+        .dropdown button {
+            background: none; border: none; padding: 11px 18px;
+            color: var(--text); cursor: pointer; font-size: 14px;
+            font-family: 'DM Sans', sans-serif; text-align: left;
+            transition: background 0.15s; width: 100%;
+        }
+        .dropdown button:hover { background: var(--inst-bg); }
+        .dropdown-sep { height: 1px; background: var(--card-border); margin: 6px 0; }
+        .dropdown button.logout { color: var(--accent); font-weight: 500; }
+        .dropdown button.logout:hover { background: rgba(224,92,0,0.08); }
+        .dropdown button.delete { color: #dc2626; font-weight: 500; }
+        .dropdown button.delete:hover { background: rgba(220,38,38,0.08); }
+
+        .game-container {
+            display: flex; flex-direction: column; gap: 40px;
+            align-items: center; padding: 0 20px 100px;
+            width: 100%; max-width: 580px; margin: 0 auto;
+        }
+
+        .game-card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 16px; overflow: hidden; width: 100%;
+            box-shadow: 0 4px 24px var(--shadow); transition: transform 0.25s, box-shadow 0.25s;
+        }
+        .game-card:hover { transform: translateY(-3px); box-shadow: 0 12px 36px var(--shadow); }
+
+        .game-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px 14px; border-bottom: 1px solid var(--card-border);
+        }
+        .game-header-left { display: flex; align-items: center; gap: 10px; }
+        .game-dot { width:8px; height:8px; border-radius:50%; background:var(--gold); flex-shrink:0; }
+        .game-title { font-family:'Playfair Display',serif; font-size:17px; color:var(--text); }
+        .game-badge {
+            font-size: 11px; font-weight: 500; letter-spacing: 1px;
+            text-transform: uppercase; padding: 4px 10px; border-radius: 20px;
+            background: var(--badge-bg); color: var(--badge-text);
+        }
+
+        .game-iframe-wrap { width:100%; aspect-ratio:485/402; background:#000; }
+        .game-iframe-wrap iframe { width:100%; height:100%; border:none; display:block; }
+
+        .instructions {
+            padding: 14px 20px; color: var(--inst-text); font-size: 13.5px;
+            line-height: 1.6; border-top: 1px solid var(--card-border);
+            background: var(--inst-bg);
+        }
+        .instructions strong { color: var(--gold); }
+        .credits {
+            padding: 8px 20px 12px;
+            font-size: 12.5px;
+            color: var(--subtext);
+            border-top: 1px solid var(--card-border);
+            background: var(--inst-bg);
+        }
+        .credits strong { color: var(--text); }
+        .platform-badge {
+            font-size: 11px; font-weight: 500; padding: 4px 10px;
+            border-radius: 20px; white-space: nowrap;
+        }
+        .mobile-ok { background: #dcfce7; color: #15803d; }
+        .desktop-only { background: #fef9c3; color: #854d0e; }
+
+        @media (max-width: 540px) {
+            .header h1 { font-size: 22px; padding: 0 50px; }
+            .settings-container { top: 14px; right: 14px; }
+            .game-badge { display: none; }
+        }
+
+        .thankyou {
+            width: 100%;
+            max-width: 580px;
+            margin: 0 auto;
+            padding: 0 20px 80px;
+        }
+        .thankyou-inner {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 40px 32px;
+            text-align: center;
+            box-shadow: 0 4px 24px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        .thankyou-inner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+        .thankyou-icon {
+            font-size: 40px;
+            margin-bottom: 16px;
+        }
+        .thankyou-inner h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            color: var(--text);
+            margin-bottom: 14px;
+            letter-spacing: 0.5px;
+        }
+        .thankyou-divider {
+            width: 40px; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin: 0 auto 18px;
+        }
+        .thankyou-inner p {
+            font-size: 14.5px;
+            line-height: 1.8;
+            color: var(--inst-text);
+            max-width: 420px;
+            margin: 0 auto 20px;
+        }
+        .thankyou-tag {
+            font-size: 13px;
+            color: var(--gold);
+            font-style: italic;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
 
-<header>
-    <h2>MyGame Scratch</h2>
-    <div class="auth-btns-group">
-        <button onclick="openAuthModal()" class="btn-g" style="padding:7px 18px;font-size:11px;">Login / Register</button>
+    <div class="header">
+        <div class="settings-container">
+            <button class="settings-btn" onclick="toggleSettings()" title="Settings">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58
+                    c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96
+                    c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84
+                    c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33
+                    c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58
+                    C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61
+                    l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54
+                    c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54
+                    c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32
+                    c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z
+                    M12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                </svg>
+            </button>
+            <div class="dropdown" id="themeDropdown">
+                <div class="dropdown-label">Theme</div>
+                <button onclick="setTheme('system')">⚙️ System Default</button>
+                <button onclick="setTheme('dark')">🌙 Dark Mode</button>
+                <button onclick="setTheme('light')">☀️ Light Mode</button>
+                <div class="dropdown-sep"></div>
+                <button class="logout" onclick="handleFirebaseLogout()">🚪 Logout</button>
+                <button class="delete" onclick="handleFirebaseDeleteAccount()">⚠️ Delete Account</button>
+            </div>
+        </div>
+        <div class="header-eyebrow">Exclusive Access</div>
+        <h1>VIP Members Area</h1>
+        <div class="gold-divider"></div>
     </div>
-</header>
 
-<main style="padding: 20px; text-align: center;">
-    <h1>Welcome to MyGame Scratch</h1>
-    <p>Sign in to access the VIP Area.</p>
-</main>
+    <div class="game-container">
+        <!-- Car Game -->
+        <div class="game-card">
+            <div class="game-header">
+                <div class="game-header-left">
+                    <div class="game-dot"></div>
+                    <div class="game-title">Car Game</div>
+                </div>
+                <span class="game-badge">Sports & Racing</span>
+                <span class="platform-badge mobile-ok">📱 Mobile & Desktop</span>
+            </div>
+            <div class="game-iframe-wrap">
+                <iframe src="https://scratch.mit.edu/projects/1131358274/embed" allowtransparency="true" scrolling="no" allowfullscreen></iframe>
+            </div>
+            <div class="instructions">
+                <strong>How to play:</strong> Use the <strong>Arrow Keys</strong> to steer your car. Avoid obstacles and try to survive as long as possible!
+            </div>
+        </div>
 
-<!-- Authentication Modal -->
-<div id="authModal" class="modal">
-    <div class="modal-content">
-        <h3 id="modalTitle">Login</h3>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Password">
-        <br>
-        <button onclick="handleEmailAuth()" class="btn-g" style="padding:10px 20px; margin-top: 10px;">Submit</button>
-        <button onclick="handleGoogleSignIn()" class="btn-o" style="padding:10px 20px; margin-top: 10px;">Sign in with Google</button>
-        <p style="cursor: pointer; color: #aaa;" onclick="toggleAuthMode()" id="toggleModeTxt">Don't have an account? Register</p>
-        <button onclick="closeAuthModal()" class="btn-o" style="padding:5px 10px; margin-top: 20px;">Cancel</button>
+        <!-- Geometry Dash -->
+        <div class="game-card">
+            <div class="game-header">
+                <div class="game-header-left">
+                    <div class="game-dot"></div>
+                    <div class="game-title">Geometry Dash</div>
+                </div>
+                <span class="game-badge">Rhythm</span>
+                <span class="platform-badge mobile-ok">📱 Mobile & Desktop</span>
+            </div>
+            <div class="game-iframe-wrap">
+                <iframe src="https://scratch.mit.edu/projects/1054432158/embed" allowtransparency="true" scrolling="no" allowfullscreen></iframe>
+            </div>
+            <div class="instructions">
+                <strong>How to play:</strong> Press <strong>Space</strong> or click to jump. Time your jumps to the beat and avoid the spikes!
+            </div>
+            <div class="credits">🎮 Created by <strong>griffpatch</strong></div>
+        </div>
+
+        <!-- Slither.io -->
+        <div class="game-card">
+            <div class="game-header">
+                <div class="game-header-left">
+                    <div class="game-dot"></div>
+                    <div class="game-title">Slither.io</div>
+                </div>
+                <span class="game-badge">Arcade</span>
+                <span class="platform-badge mobile-ok">📱 Mobile & Desktop</span>
+            </div>
+            <div class="game-iframe-wrap">
+                <iframe src="https://scratch.mit.edu/projects/108566337/embed" allowtransparency="true" scrolling="no" allowfullscreen></iframe>
+            </div>
+            <div class="instructions">
+                <strong>How to play:</strong> Move your mouse to control your snake. Eat the glowing dots to grow bigger!
+            </div>
+            <div class="credits">🎮 Created by <strong>griffpatch</strong></div>
+        </div>
+
+        <!-- Flappy Bird -->
+        <div class="game-card">
+            <div class="game-header">
+                <div class="game-header-left">
+                    <div class="game-dot"></div>
+                    <div class="game-title">Flappy Bird</div>
+                </div>
+                <span class="game-badge">Arcade</span>
+                <span class="platform-badge mobile-ok">📱 Mobile & Desktop</span>
+            </div>
+            <div class="game-iframe-wrap">
+                <iframe src="https://scratch.mit.edu/projects/17828009/embed" allowtransparency="true" scrolling="no" allowfullscreen></iframe>
+            </div>
+            <div class="instructions">
+                <strong>How to play:</strong> Tap the screen or press <strong>Space</strong> to flap through the pipes!
+            </div>
+            <div class="credits">🎮 Created by <strong>HYPERPIXEL_2015</strong></div>
+        </div>
+
+        <!-- Paper Minecraft -->
+        <div class="game-card">
+            <div class="game-header">
+                <div class="game-header-left">
+                    <div class="game-dot"></div>
+                    <div class="game-title">Paper Minecraft</div>
+                </div>
+                <span class="game-badge">Sandbox</span>
+                <span class="platform-badge desktop-only">🖥️ Desktop Only</span>
+            </div>
+            <div class="game-iframe-wrap">
+                <iframe src="https://scratch.mit.edu/projects/45962536/embed" allowtransparency="true" scrolling="no" allowfullscreen></iframe>
+            </div>
+            <div class="instructions">
+                <strong>How to play:</strong> Use <strong>WASD</strong> to move, <strong>Mouse</strong> to dig or place blocks, and <strong>E</strong> for inventory.
+            </div>
+            <div class="credits">🎮 Created by <strong>griffpatch</strong></div>
+        </div>
+
+        <!-- Epic Ninja -->
+        <div class="game-card">
+            <div class="game-header">
+                <div class="game-header-left">
+                    <div class="game-dot"></div>
+                    <div class="game-title">Epic Ninja</div>
+                </div>
+                <span class="game-badge">Platformer</span>
+                <span class="platform-badge desktop-only">🖥️ Desktop Only</span>
+            </div>
+            <div class="game-iframe-wrap">
+                <iframe src="https://scratch.mit.edu/projects/21554369/embed" allowtransparency="true" scrolling="no" allowfullscreen></iframe>
+            </div>
+            <div class="instructions">
+                <strong>How to play:</strong> Use <strong>Arrow Keys</strong> to move and <strong>Space</strong> to throw shurikens.
+            </div>
+            <div class="credits">🎮 Created by <strong>griffpatch</strong></div>
+        </div>
+
+        <!-- Appel -->
+        <div class="game-card">
+            <div class="game-header">
+                <div class="game-header-left">
+                    <div class="game-dot"></div>
+                    <div class="game-title">Appel</div>
+                </div>
+                <span class="game-badge">Platformer</span>
+                <span class="platform-badge desktop-only">🖥️ Desktop Only</span>
+            </div>
+            <div class="game-iframe-wrap">
+                <iframe src="https://scratch.mit.edu/projects/60917032/embed" allowtransparency="true" scrolling="no" allowfullscreen></iframe>
+            </div>
+            <div class="instructions">
+                <strong>How to play:</strong> Use <strong>Arrow Keys</strong> or <strong>WASD</strong> to run, jump, and wall jump!
+            </div>
+            <div class="credits">🎮 Created by <strong>griffpatch</strong></div>
+        </div>
+
+        <!-- Terraria -->
+        <div class="game-card">
+            <div class="game-header">
+                <div class="game-header-left">
+                    <div class="game-dot"></div>
+                    <div class="game-title">Terraria</div>
+                </div>
+                <span class="game-badge">Sandbox</span>
+                <span class="platform-badge desktop-only">🖥️ Desktop Only</span>
+            </div>
+            <div class="game-iframe-wrap">
+                <iframe src="https://scratch.mit.edu/projects/322341152/embed" allowtransparency="true" scrolling="no" allowfullscreen></iframe>
+            </div>
+            <div class="instructions">
+                <strong>How to play:</strong> Use <strong>WASD</strong> to move and <strong>Mouse</strong> to mine and build.
+            </div>
+            <div class="credits">🎮 Created by <strong>griffpatch</strong></div>
+        </div>
     </div>
-</div>
 
-<script type="module">
-    // Import Firebase SDKs
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <div class="thankyou">
+        <div class="thankyou-inner">
+            <div class="thankyou-icon">👑</div>
+            <h2>Thank You for Being a VIP Member</h2>
+            <div class="thankyou-divider"></div>
+            <p>You're part of an exclusive group that gets access to the best games, early updates, and so much more. We appreciate your support!</p>
+            <div class="thankyou-tag">— The VIP Members Team</div>
+        </div>
+    </div>
 
-    // YOUR FIREBASE CONFIGURATION
-    const firebaseConfig = {
-        apiKey: "AIzaSyCf0Pfa0HOV4ciAVtqwLVNq_gLcCtAAk8Q",
-        authDomain: "mygamescratch.firebaseapp.com",
-        projectId: "mygamescratch",
-        storageBucket: "mygamescratch.firebasestorage.app",
-        messagingSenderId: "256549154945",
-        appId: "1:256549154945:web:aa29c54bf7036cb3f65d80"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const googleProvider = new GoogleAuthProvider();
-
-    let isLoginMode = true;
-
-    // UI Functions
-    window.openAuthModal = () => document.getElementById('authModal').style.display = 'flex';
-    window.closeAuthModal = () => document.getElementById('authModal').style.display = 'none';
-    window.toggleAuthMode = () => {
-        isLoginMode = !isLoginMode;
-        document.getElementById('modalTitle').innerText = isLoginMode ? 'Login' : 'Register';
-        document.getElementById('toggleModeTxt').innerText = isLoginMode ? "Don't have an account? Register" : "Already have an account? Login";
-    };
-
-    // Ensure User Document in Firestore
-    async function ensureUserDocExists(user) {
-        const userRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(userRef);
-        if (!docSnap.exists()) {
-            await setDoc(userRef, {
-                email: user.email,
-                createdAt: new Date().toISOString()
-            });
-        }
-    }
-
-    // Google Sign In
-    window.handleGoogleSignIn = async () => {
-        try {
-            const result = await signInWithPopup(auth, googleProvider);
-            await ensureUserDocExists(result.user);
-            closeAuthModal();
-            window.location.href = "/vip-area.html";
-        } catch (error) {
-            alert('Google Sign-In Error: ' + error.message);
-        }
-    };
-
-    // Email/Password Auth
-    window.handleEmailAuth = async () => {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        if (!email || !password) return alert("Please enter email and password");
-
-        try {
-            if (isLoginMode) {
-                await signInWithEmailAndPassword(auth, email, password);
+    <script>
+        const dropdown = document.getElementById('themeDropdown');
+        function toggleSettings() { dropdown.classList.toggle('show'); }
+        window.onclick = function(e) {
+            if (!e.target.closest('.settings-container')) dropdown.classList.remove('show');
+        };
+        function setTheme(mode) {
+            if (mode === 'system') {
+                document.documentElement.classList.toggle('light-mode',
+                    window.matchMedia('(prefers-color-scheme: light)').matches);
             } else {
-                const result = await createUserWithEmailAndPassword(auth, email, password);
-                await ensureUserDocExists(result.user);
+                document.documentElement.classList.toggle('light-mode', mode === 'light');
             }
-            closeAuthModal();
-            window.location.href = "/vip-area.html";
-        } catch (error) {
-            alert('Authentication Error: ' + error.message);
+            try { localStorage.setItem('mygame_theme', mode); } catch(e) {}
+            dropdown.classList.remove('show');
         }
-    };
-
-    // Logout
-    window.handleSignOut = async () => {
-        try {
-            await signOut(auth);
-            alert("Logged out successfully");
-        } catch (error) {
-            alert("Error logging out: " + error.message);
-        }
-    };
-
-    // Track Authentication State to update UI
-    onAuthStateChanged(auth, async (user) => {
-        const authButtons = document.querySelectorAll('.auth-btns-group');
-        if (user) {
-            authButtons.forEach(el => {
-                el.innerHTML = `
-                    <a href="/vip-area.html" class="btn-g" style="padding:7px 18px;font-size:11px;">VIP Area</a>
-                    <button onclick="handleSignOut()" class="btn-o" style="padding:7px 18px;font-size:11px;">Logout</button>
-                `;
-            });
-        } else {
-            authButtons.forEach(el => {
-                el.innerHTML = `<button onclick="openAuthModal()" class="btn-g" style="padding:7px 18px;font-size:11px;">Login / Register</button>`;
-            });
-        }
-    });
-</script>
+    </script>
 </body>
 </html>
