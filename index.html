@@ -3,25 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mygame Scratch - Free Online Games</title>
+  <title>Mygame Scratch - Free Online Games by Akshat</title>
   
   <!-- SEO & AUTHOR METADATA -->
-   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "Mygame Scratch",
-    "alternateName": ["Mygame", "mygamescratch"],
-    "url": "https://mygamescratch.vercel.app/",
-    "keywords": "mygame, mygamescratch, scratch, mygamescratch.vercel.app, games, Akshat",
-    "author": {
-      "@type": "Person",
-      "name": "Akshat",
-      "jobTitle": "Web Developer & Game Creator",
-      "description": "Akshat is a young web developer creating interactive web experiences and games.",
-      "url": "https://github.com/mygame-creator",
-      "sameAs": [
-        "https://github.com/mygame-creator"
+  <meta name="author" content="Akshat">
+  <meta name="description" content="Mygame Scratch is a web gaming platform created and developed by Akshat, featuring free interactive online Scratch games.">
+  <meta name="keywords" content="mygame, mygamescratch, scratch, mygamescratch.vercel.app, games, Akshat, web developer, game developer">
+  <meta name="application-name" content="Mygame Scratch">
+  <meta name="apple-mobile-web-app-title" content="Mygame Scratch">
 
   <!-- GOOGLE ANALYTICS -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-B1HQG0KC8Z"></script>
@@ -184,7 +173,7 @@
     });
   </script>
   
-  <!-- STRUCTURED DATA FOR GOOGLE SEARCH -->
+  <!-- ENHANCED STRUCTURED DATA FOR GOOGLE SEARCH -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -192,12 +181,21 @@
     "name": "Mygame Scratch",
     "alternateName": ["Mygame", "mygamescratch"],
     "url": "https://mygamescratch.vercel.app/",
-    "keywords": "mygame, mygamescratch, scratch, mygamescratch.vercel.app, games",
+    "keywords": "mygame, mygamescratch, scratch, mygamescratch.vercel.app, games, Akshat",
     "author": {
       "@type": "Person",
       "name": "Akshat",
-      "jobTitle": "Young Web Developer",
-      "description": "Akshat is a young web developer creating interactive web experiences and games."
+      "jobTitle": "Creator & Lead Developer",
+      "url": "https://github.com/mygame-creator",
+      "sameAs": [
+        "https://github.com/mygame-creator"
+      ],
+      "description": "Akshat is the founder and web developer behind Mygame Scratch, creating interactive web games and online player experiences."
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Akshat",
+      "url": "https://github.com/mygame-creator"
     }
   }
   </script>
@@ -339,7 +337,9 @@
     }
     .nav-logo { font-size:18px; font-weight:900; letter-spacing:6px; text-decoration:none; color:var(--text); }
     .nav-logo span { color:var(--gold); }
-    .nav-links { display:flex; gap:10px; align-items:center; }
+    .nav-links { display:flex; gap:12px; align-items:center; }
+    .nav-links a.nav-item { color:var(--text-muted); text-decoration:none; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; transition:color .2s; }
+    .nav-links a.nav-item:hover { color:var(--gold); }
 
     /* HERO */
     .hero {
@@ -377,6 +377,21 @@
     .stat-item:last-child { border-right:none; }
     .stat-num { font-size:36px; font-weight:900; color:var(--gold); letter-spacing:2px; }
     .stat-lbl { font-size:11px; color:var(--text-muted); letter-spacing:2px; text-transform:uppercase; margin-top:6px; }
+
+    /* ── ABOUT CREATOR SECTION ── */
+    .about-section {
+      padding:100px 24px;
+      background:var(--dark);
+      border-bottom:1px solid rgba(194,157,76,0.08);
+      text-align:center;
+      position:relative;
+    }
+    .about-container { max-width:680px; margin:0 auto; position:relative; z-index:2; }
+    .about-label { color:var(--gold); font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:12px; }
+    .about-title { font-size:clamp(26px,4vw,38px); font-weight:800; letter-spacing:3px; margin-bottom:16px; }
+    .about-bio { color:var(--text-muted); font-size:15px; line-height:1.8; margin-bottom:24px; }
+    .about-link { color:var(--gold); text-decoration:none; font-weight:700; border-bottom:1px solid var(--gold); padding-bottom:2px; transition:opacity .2s; }
+    .about-link:hover { opacity:0.8; }
 
     /* CTA */
     .cta-section {
@@ -488,10 +503,13 @@
 <div id="homepage">
   <nav>
     <a href="#" class="nav-logo">My<span>game</span></a>
-    <div class="nav-links auth-btns-group">
-      <a href="https://sites.google.com/view/mygamehelp" target="_top" class="btn-q" style="padding:7px 14px;font-size:11px;">Help</a>
-      <button onclick="openAuthModal('login')" class="btn-o" style="padding:7px 18px;font-size:11px;">Login</button>
-      <button onclick="openAuthModal('register')" class="btn-g" style="padding:7px 18px;font-size:11px;">Register</button>
+    <div class="nav-links">
+      <a href="#about" class="nav-item">About Developer</a>
+      <div class="auth-btns-group" style="display:inline-flex; gap:8px;">
+        <a href="https://sites.google.com/view/mygamehelp" target="_top" class="btn-q" style="padding:7px 14px;font-size:11px;">Help</a>
+        <button onclick="openAuthModal('login')" class="btn-o" style="padding:7px 18px;font-size:11px;">Login</button>
+        <button onclick="openAuthModal('register')" class="btn-g" style="padding:7px 18px;font-size:11px;">Register</button>
+      </div>
     </div>
   </nav>
 
@@ -516,6 +534,19 @@
     <div class="stat-item"><div class="stat-num">Free</div><div class="stat-lbl">To Play</div></div>
   </div>
 
+  <!-- ── ABOUT SECTION ── -->
+  <section class="about-section" id="about">
+    <div class="about-container">
+      <div class="about-label">Creator Profile</div>
+      <h2 class="about-title">About the Developer</h2>
+      <div class="gold-bar" style="width:50px;height:2px;margin:0 auto 20px;"></div>
+      <p class="about-bio">
+        <strong>Mygame Scratch</strong> was created and developed by <strong>Akshat</strong>. Akshat is a web developer dedicated to building high-performance web applications, interactive web experiences, and curated online games. 
+      </p>
+      <a href="https://github.com/mygame-creator" target="_blank" class="about-link">View Akshat's GitHub Profile →</a>
+    </div>
+  </section>
+
   <section class="cta-section">
     <div class="cta-glow"></div>
     <div class="cta-label">Ready?</div>
@@ -530,8 +561,9 @@
 
   <footer>
     <div class="footer-logo">My<span>game</span></div>
-    <div class="footer-copy">© 2026 Mygame · All rights reserved</div>
+    <div class="footer-copy">© 2026 Mygame Scratch · Created by Akshat</div>
     <div class="footer-links">
+      <a href="#about">About Creator</a>
       <a href="https://sites.google.com/view/mygamehelp" target="_top">Help</a>
       <a onclick="openAuthModal('register')" style="color:var(--gold);cursor:pointer;">Register</a>
     </div>
