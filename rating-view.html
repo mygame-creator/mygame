@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Ratings - Mygame Scratch</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --gold: #c29d4c;
+            --dark: #0a0a0a;
+            --card-bg: #161616;
+            --border: rgba(194,157,76,0.15);
+            --text-muted: rgba(255,255,255,0.5);
+        }
+        body { background: var(--dark); color: #fff; font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 40px; background: rgba(10,10,10,0.9); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo { font-size: 18px; font-weight: 900; letter-spacing: 5px; text-decoration: none; color: #fff; }
+        .nav-logo span { color: var(--gold); }
+        .btn-rate {
+            background: var(--gold); color: #000; padding: 8px 18px; border-radius: 20px;
+            font-size: 12px; font-weight: 700; text-decoration: none; transition: transform .2s;
+        }
+        .btn-rate:hover { transform: translateY(-1px); }
+        
+        .container { max-width: 600px; margin: 120px auto 60px; padding: 0 20px; }
+        h1 { text-align: center; font-size: 28px; color: var(--gold); letter-spacing: 2px; margin-bottom: 8px; }
+        .subtitle { text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 40px; }
+        
+        .rating-card {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+            padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .stars { color: var(--gold); font-size: 16px; letter-spacing: 2px; }
+        .date { font-size: 11px; color: var(--text-muted); }
+        .feedback { font-size: 14px; color: #e0e0e0; }
+        .empty-state { text-align: center; color: var(--text-muted); font-size: 14px; margin-top: 60px; }
+    </style>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCf0Pfa0HOV4ciAVtqwLVNq_gLcCtAAk8Q",
+            authDomain: "mygamescratch.firebaseapp.com",
+            projectId: "mygamescratch",
+            storageBucket: "mygamescratch.firebasestorage.app",
+            messagingSenderId: "256549154945",
+            appId: "1:256549154945:web:aa29c54bf7036cb3f65d80"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const listEl = document.getElementById('ratingsList');
+
+        const q = query(collection(db, "ratings"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            listEl.innerHTML = '';
+            if (snapshot.empty) {
+                listEl.innerHTML = '<div class="empty-state">No ratings submitted yet. Be the first!</div>';
+                return;
+            }
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const card = document.createElement('div');
+                card.className = 'rating-card';
+                const stars = '★'.repeat(data.rating) + '☆'.repeat(5 - data.rating);
+                const dateStr = new Date(data.createdAt).toLocaleDateString();
+
+                card.innerHTML = `
+                    <div class="card-top">
+                        <div class="stars">${stars}</div>
+                        <div class="date">${dateStr}</div>
+                    </div>
+                    <div class="feedback">"${data.feedback}"</div>
+                `;
+                listEl.appendChild(card);
+            });
+        }, (err) => {
+            listEl.innerHTML = `<div class="empty-state">Error: ${err.message}</div>`;
+        });
+    </script>
+</head>
+<body>
+
+    <nav>
+        <a href="https://mygamescratch.vercel.app/" class="nav-logo">My<span>game</span></a>
+        <a href="rating-page.html" class="btn-rate">⭐ Rate Us</a>
+    </nav>
+
+    <div class="container">
+        <h1>Community Feedback</h1>
+        <div class="subtitle">Real player ratings from Mygame Scratch</div>
+        <div id="ratingsList">Loading ratings...</div>
+    </div>
+
+</body>
+</html>
