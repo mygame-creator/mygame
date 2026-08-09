@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mygame Scratch - Free Online Games by Akshat</title>
   <!-- FAVICON TAGS FOR BROWSERS & GOOGLE SEARCH -->
-<link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png">
-<link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <!-- WEBSITE FAVICON / TAB ICONS -->
-<link rel="icon" type="image/png" sizes="32x32" href="/icon-192.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
-<link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <!-- SEO & AUTHOR METADATA -->
   <meta name="author" content="Akshat">
   <meta name="description" content="Mygame Scratch is a web gaming platform created and developed by Akshat, featuring free interactive online Scratch games.">
@@ -411,6 +411,35 @@
     .about-link { color:var(--gold); text-decoration:none; font-weight:700; border-bottom:1px solid var(--gold); padding-bottom:2px; transition:opacity .2s; }
     .about-link:hover { opacity:0.8; }
 
+    /* CREDITS BOX INSIDE ABOUT SECTION */
+    .credits-box {
+      margin-top: 36px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(194, 157, 76, 0.2);
+      border-radius: 8px;
+    }
+    .credits-box h3 {
+      font-size: 12px;
+      color: var(--gold);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .credits-box p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .credits-box a {
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .credits-box a:hover {
+      text-decoration: underline;
+    }
+
     .cta-section {
       display:flex; flex-direction:column; align-items:center;
       text-align:center; padding:100px 24px;
@@ -560,6 +589,14 @@
         <strong>Mygame Scratch</strong> was created and developed by <strong>Akshat</strong>. Akshat is a web developer dedicated to building high-performance web applications, interactive web experiences, and curated online games. 
       </p>
       <a href="https://github.com/mygame-creator" target="_blank" class="about-link">View Akshat's GitHub Profile →</a>
+
+      <!-- COMMUNITY CHAT CREDITS -->
+      <div class="credits-box">
+        <h3>Community Integration</h3>
+        <p>
+          Community Chat powered by <a href="https://chatinger-x.vercel.app/" target="_blank">ChatingerX</a>, created and developed by <strong>Pranav Jha</strong>.
+        </p>
+      </div>
     </div>
   </section>
 
