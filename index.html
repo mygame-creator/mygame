@@ -12,6 +12,13 @@
   <meta name="application-name" content="Mygame Scratch">
   <meta name="apple-mobile-web-app-title" content="Mygame Scratch">
 
+  <!-- PWA META TAGS -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#c29d4c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="https://mygamescratch.vercel.app/icon-192.png">
+
   <!-- GOOGLE ANALYTICS -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-B1HQG0KC8Z"></script>
   <script>
@@ -150,7 +157,7 @@
       });
     };
 
-    // Auth State Tracker (Loop Fix: No auto-redirect on load)
+    // Auth State Tracker
     onAuthStateChanged(auth, async (user) => {
       const authButtons = document.querySelectorAll('.auth-btns-group');
       if (user) {
@@ -583,6 +590,15 @@
   }
   tick();
   setInterval(tick, 1000);
+
+  // REGISTER SERVICE WORKER
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then((reg) => console.log('Service Worker registered successfully:', reg.scope))
+        .catch((err) => console.error('Service Worker registration failed:', err));
+    });
+  }
 </script>
 
 </body>
