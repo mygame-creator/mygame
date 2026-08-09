@@ -10,13 +10,6 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     
-    <!-- PWA META TAGS -->
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#c29d4c">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://mygamescratch.vercel.app/icon-192.png">
-    
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     
     <script>
@@ -170,7 +163,8 @@
         .settings-btn {
             background: var(--card-bg); border: 1px solid var(--card-border);
             border-radius: 50%; cursor: pointer; outline: none;
-            padding: 9px; display: flex; align-items: center; justify-content: center;
+            padding: 99px; display: flex; align-items: center; justify-content: center;
+            padding: 9px;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
         .settings-btn:hover { border-color: var(--gold); box-shadow: 0 0 12px rgba(200,169,90,0.2); }
@@ -521,15 +515,6 @@
             }
             try { localStorage.setItem('mygame_theme', mode); } catch(e) {}
             dropdown.classList.remove('show');
-        }
-
-        // REGISTER SERVICE WORKER
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then((reg) => console.log('Service Worker registered successfully:', reg.scope))
-                    .catch((err) => console.error('Service Worker registration failed:', err));
-            });
         }
     </script>
 </body>
