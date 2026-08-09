@@ -50,8 +50,6 @@
         .single-line-input:focus { border-color: rgba(200, 169, 90, 0.40); background: rgba(255, 255, 255, 0.05); box-shadow: 0 0 0 4px rgba(200, 169, 90, 0.05); transform: scale(1.005); }
         .single-line-input.error { border-color: rgba(212, 90, 90, 0.50); box-shadow: 0 0 0 4px rgba(212, 90, 90, 0.05); }
         .char-counter { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, 0.12); pointer-events: none; }
-        .char-counter.warning { color: rgba(200, 169, 90, 0.40); }
-        .char-counter.danger { color: rgba(212, 90, 90, 0.40); }
         
         .message { display: none; margin-top: 12px; padding: 10px 14px; border-radius: 12px; font-size: 13px; font-weight: 500; text-align: center; }
         .message.error { display: block; background: rgba(212, 90, 90, 0.06); color: #d45a5a; border: 1px solid rgba(212, 90, 90, 0.08); }
@@ -65,11 +63,16 @@
         .submit-btn.loading .spinner { display: block; }
         @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
         
+        .view-ratings-link {
+            display: block; text-align: center; margin-top: 16px; color: rgba(200, 169, 90, 0.8);
+            font-size: 13px; font-weight: 600; text-decoration: none; transition: color 0.2s ease;
+        }
+        .view-ratings-link:hover { color: #c8a95a; text-decoration: underline; }
+
         .success-inline { display: none; margin-top: 18px; padding: 14px 18px; border-radius: 14px; background: rgba(76, 175, 80, 0.05); border: 1px solid rgba(76, 175, 80, 0.08); color: #66bb6a; font-size: 14px; font-weight: 500; align-items: center; justify-content: center; gap: 10px; }
         .success-inline .check-icon { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: rgba(76, 175, 80, 0.12); }
     </style>
 
-    <!-- FIREBASE MODULE LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
@@ -143,6 +146,9 @@
                 <span class="btn-text">Submit feedback</span>
                 <span class="spinner"></span>
             </button>
+
+            <!-- VIEW ALL RATINGS LINK -->
+            <a href="rating-view.html" class="view-ratings-link">💬 See existing ratings & feedback</a>
 
             <div id="successMsg" class="success-inline">
                 <span class="check-icon">✓</span>
