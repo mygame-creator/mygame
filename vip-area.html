@@ -163,8 +163,7 @@
         .settings-btn {
             background: var(--card-bg); border: 1px solid var(--card-border);
             border-radius: 50%; cursor: pointer; outline: none;
-            padding: 99px; display: flex; align-items: center; justify-content: center;
-            padding: 9px;
+            padding: 9px; display: flex; align-items: center; justify-content: center;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
         .settings-btn:hover { border-color: var(--gold); box-shadow: 0 0 12px rgba(200,169,90,0.2); }
@@ -180,18 +179,52 @@
         .dropdown.show { display: flex; animation: dropIn 0.18s ease; }
         @keyframes dropIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
         .dropdown-label { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--subtext); padding:12px 18px 6px; font-weight:500; }
-        .dropdown button {
+        .dropdown button, .dropdown a {
             background: none; border: none; padding: 11px 18px;
             color: var(--text); cursor: pointer; font-size: 14px;
             font-family: 'DM Sans', sans-serif; text-align: left;
             transition: background 0.15s; width: 100%;
+            text-decoration: none; display: block;
         }
-        .dropdown button:hover { background: var(--inst-bg); }
+        .dropdown button:hover, .dropdown a:hover { background: var(--inst-bg); }
         .dropdown-sep { height: 1px; background: var(--card-border); margin: 6px 0; }
         .dropdown button.logout { color: var(--accent); font-weight: 500; }
         .dropdown button.logout:hover { background: rgba(224,92,0,0.08); }
         .dropdown button.delete { color: #dc2626; font-weight: 500; }
         .dropdown button.delete:hover { background: rgba(220,38,38,0.08); }
+
+        /* FLOATING SMALL CORNER CHAT BUTTON */
+        .floating-chat-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px var(--shadow);
+            text-decoration: none;
+            transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .floating-chat-btn:hover {
+            transform: scale(1.1);
+            background: var(--gold);
+            color: #0d0d0d;
+            box-shadow: 0 0 18px rgba(200, 169, 90, 0.5);
+        }
+
+        .floating-chat-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
 
         .game-container {
             display: flex; flex-direction: column; gap: 40px;
@@ -247,6 +280,8 @@
             .header h1 { font-size: 22px; padding: 0 50px; }
             .settings-container { top: 14px; right: 14px; }
             .game-badge { display: none; }
+            .floating-chat-btn { bottom: 18px; right: 18px; width: 46px; height: 46px; }
+            .floating-chat-btn svg { width: 20px; height: 20px; }
         }
 
         .thankyou {
@@ -336,6 +371,13 @@
         <h1>VIP Members Area</h1>
         <div class="gold-divider"></div>
     </div>
+
+    <!-- SMALL CORNER FLOATING CHAT BUTTON -->
+    <a href="https://chatinger-x.vercel.app/community/742382FIUWfRFIg3VUdW" target="_blank" class="floating-chat-btn" title="Community Chat">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
+        </svg>
+    </a>
 
     <div class="game-container">
         <!-- Car Game -->
