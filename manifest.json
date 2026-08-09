@@ -1,0 +1,22 @@
+{
+  "name": "Mygame Scratch",
+  "short_name": "Mygame",
+  "description": "Play free online Scratch games on Mygame Scratch.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#c29d4c",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "https://mygamescratch.vercel.app/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://mygamescratch.vercel.app/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
