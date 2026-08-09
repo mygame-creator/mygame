@@ -23,6 +23,7 @@
         }
         .nav-logo { font-size: 18px; font-weight: 900; letter-spacing: 5px; text-decoration: none; color: #fff; }
         .nav-logo span { color: var(--gold); }
+        .nav-actions { display: flex; gap: 12px; align-items: center; }
         .btn-rate {
             background: var(--gold); color: #000; padding: 8px 18px; border-radius: 20px;
             font-size: 12px; font-weight: 700; text-decoration: none; transition: transform .2s;
@@ -59,6 +60,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
         const listEl = document.getElementById('ratingsList');
 
         const q = query(collection(db, "ratings"), orderBy("createdAt", "desc"));
@@ -93,7 +95,9 @@
 
     <nav>
         <a href="https://mygamescratch.vercel.app/" class="nav-logo">My<span>game</span></a>
-        <a href="rating-page.html" class="btn-rate">⭐ Rate Us</a>
+        <div class="nav-actions">
+            <a href="rating-page.html" class="btn-rate">⭐ Rate Us</a>
+        </div>
     </nav>
 
     <div class="container">
