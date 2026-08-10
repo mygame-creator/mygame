@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Arcade - Mygame Scratch</title>
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="https://mygamescratch.vercel.app/icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="https://mygamescratch.vercel.app/icon-192.png">
+  <link rel="apple-touch-icon" href="https://mygamescratch.vercel.app/icon-192.png">
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCf0Pfa0HOV4ciAVtqwLVNq_gLcCtAAk8Q",
+      authDomain: "mygamescratch.firebaseapp.com",
+      projectId: "mygamescratch",
+      storageBucket: "mygamescratch.firebasestorage.app",
+      messagingSenderId: "256549154945",
+      appId: "1:256549154945:web:aa29c54bf7036cb3f65d80",
+      measurementId: "G-K8RS2L4P3V"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    window.handleSignOut = function() {
+      signOut(auth).then(() => {
+        window.location.href = "index.html";
+      });
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      const authButtons = document.getElementById('nav-auth-group');
+      if (user) {
+        authButtons.innerHTML = `
+          <span style="font-size:12px;color:var(--text-muted);">Logged in as <strong>${user.email.split('@')[0]}</strong></span>
+          <a href="https://mygamescratch.vercel.app/vip-area.html" class="btn-g" style="padding:7px 16px;font-size:11px;">VIP Area</a>
+          <button onclick="handleSignOut()" class="btn-o" style="padding:7px 14px;font-size:11px;">Logout</button>
+        `;
+      } else {
+        authButtons.innerHTML = `
+          <a href="index.html" class="btn-g" style="padding:7px 16px;font-size:11px;">Login / Register</a>
+        `;
+      }
+    });
+  </script>
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --gold: #c29d4c; --gold-dim: rgba(194,157,76,0.15);
+      --dark: #0a0a0a; --dark2: #111; --text: #ffffff; --text-muted: rgba(255,255,255,0.42);
+    }
+    body { background:var(--dark); font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:var(--text); padding-top:80px; }
+
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:50; display:flex; justify-content:space-between; align-items:center;
+      padding:16px 40px; background:rgba(10,10,10,0.88); backdrop-filter:blur(14px); border-bottom:1px solid rgba(194,157,76,0.08);
+    }
+    .nav-logo { font-size:18px; font-weight:900; letter-spacing:6px; text-decoration:none; color:var(--text); }
+    .nav-logo span { color:var(--gold); }
+
+    .btn-g { background:var(--gold); color:#0a0a0a; padding:10px 20px; border-radius:4px; font-size:12px; font-weight:800; text-transform:uppercase; text-decoration:none; border:none; cursor:pointer; }
+    .btn-o { background:transparent; color:var(--gold); padding:9px 18px; border-radius:4px; font-size:12px; font-weight:800; text-transform:uppercase; text-decoration:none; border:1px solid var(--gold); cursor:pointer; }
+
+    .header-banner { text-align:center; padding:40px 20px 20px; }
+    .header-banner h1 { font-size:32px; font-weight:800; color:var(--gold); letter-spacing:2px; margin-bottom:8px; }
+    .header-banner p { color:var(--text-muted); font-size:14px; }
+
+    .upgrade-box { max-width:600px; margin:20px auto 40px; background:var(--gold-dim); border:1px solid rgba(194,157,76,0.3); padding:16px; border-radius:8px; text-align:center; }
+    .upgrade-box p { font-size:13px; color:#fff; margin-bottom:10px; }
+
+    .games-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:30px; padding:20px; max-width:1200px; margin:0 auto 60px; }
+    .game-card { background:var(--dark2); border:1px solid rgba(194,157,76,0.2); border-radius:8px; padding:16px; display:flex; flex-direction:column; align-items:center; }
+    .game-card h3 { font-size:16px; color:var(--gold); margin-bottom:12px; }
+    iframe { border-radius:6px; background:#000; }
+
+    footer { border-top:1px solid rgba(194,157,76,0.08); padding:20px; text-align:center; font-size:12px; color:var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">My<span>game</span></a>
+    <div id="nav-auth-group" style="display:flex; gap:12px; align-items:center;"></div>
+  </nav>
+
+  <div class="header-banner">
+    <h1>🎮 Free Games Area</h1>
+    <p>Enjoy these standard games for free!</p>
+  </div>
+
+  <div class="upgrade-box">
+    <p>⭐ Want high-quality, exclusive games and community perks?</p>
+    <a href="index.html" class="btn-g">Upgrade to VIP or Redeem Code</a>
+  </div>
+
+  <div class="games-grid">
+    <div class="game-card">
+      <h3>Classic Pong</h3>
+      <iframe src="https://scratch.mit.edu/projects/10128515/embed" width="485" height="402" frameborder="0" scrolling="no" allowfullscreen></iframe>
+    </div>
+
+    <div class="game-card">
+      <h3>Simple Clicker</h3>
+      <iframe src="https://scratch.mit.edu/projects/14605151/embed" width="485" height="402" frameborder="0" scrolling="no" allowfullscreen></iframe>
+    </div>
+
+    <div class="game-card">
+      <h3>Starter Platformer</h3>
+      <iframe src="https://scratch.mit.edu/projects/60917032/embed" width="485" height="402" frameborder="0" scrolling="no" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <footer>
+    © 2026 Mygame Scratch · Created by Akshat
+  </footer>
+
+</body>
+</html>
