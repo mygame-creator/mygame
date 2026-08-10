@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mygame Scratch - Free Online Games by Akshat</title>
   
-  <!-- FIXED ABSOLUTE FAVICON PATHS -->
   <link rel="icon" type="image/png" sizes="32x32" href="https://mygamescratch.vercel.app/icon-192.png">
   <link rel="icon" type="image/png" sizes="192x192" href="https://mygamescratch.vercel.app/icon-192.png">
   <link rel="apple-touch-icon" href="https://mygamescratch.vercel.app/icon-192.png">
@@ -206,7 +205,6 @@
             return;
           }
 
-          // Search Firestore for active code
           const q = query(collection(db, "promo_codes"), where("code", "==", promoCode), where("status", "==", "active"));
           const querySnapshot = await getDocs(q);
 
@@ -217,14 +215,12 @@
 
           const codeDoc = querySnapshot.docs[0];
           
-          // 1. Mark code as used immediately
           await updateDoc(doc(db, "promo_codes", codeDoc.id), {
             status: "used",
             usedBy: currentUser.email,
             usedAt: new Date().toISOString()
           });
 
-          // 2. Set user tier to promo for 30 days
           const expiryDate = new Date();
           expiryDate.setDate(expiryDate.getDate() + 30);
 
@@ -248,7 +244,6 @@
       });
     };
 
-    // ADMIN FUNCTIONS (AKSHAT ONLY)
     window.openAdminModal = function() {
       if (!auth.currentUser || auth.currentUser.email.toLowerCase() !== MY_ADMIN_EMAIL.toLowerCase()) {
         alert("Access Denied: Admin privileges required.");
@@ -292,7 +287,7 @@
         let html = '<ul style="list-style:none;padding:0;">';
         snapshot.forEach(docSnap => {
           const c = docSnap.data();
-          html += `<li style="display:flex;justify-space:between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:13px;color:var(--gold);">
+          html += `<li style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:13px;color:var(--gold);">
             <strong>${c.code}</strong> <span style="font-size:11px;color:var(--text-muted);">(Unused)</span>
           </li>`;
         });
@@ -344,16 +339,13 @@
       }
     };
 
-    // State Change Listener
     onAuthStateChanged(auth, async (user) => {
       const authButtons = document.querySelectorAll('.auth-btns-group');
       if (user) {
         await ensureUserDocExists(user);
 
-        // Check if user is Akshat Admin
         const isAdmin = user.email && user.email.toLowerCase() === MY_ADMIN_EMAIL.toLowerCase();
 
-        // Check for expired promo tier
         const userRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(userRef);
         if (docSnap.exists()) {
@@ -366,24 +358,24 @@
         }
 
         const adminBtn = isAdmin 
-          ? `<button onclick="openAdminModal()" class="btn-g" style="background:#dc2626;color:#fff;padding:7px 14px;font-size:11px;border:none;">⚙️ Admin Panel</button>` 
+          ? `<button onclick="openAdminModal()" class="btn-g" style="background:#dc2626;color:#fff;padding:6px 12px;font-size:10px;border:none;">⚙️ Admin</button>` 
           : '';
 
         authButtons.forEach(el => {
           el.innerHTML = `
             ${adminBtn}
-            <a href="free-area.html" class="btn-o" style="padding:7px 14px;font-size:11px;">Free Area</a>
-            <a href="https://mygamescratch.vercel.app/vip-area.html" class="btn-g" style="padding:7px 18px;font-size:11px;">VIP Area</a>
-            <button onclick="openAuthModal('promo')" class="btn-o" style="padding:7px 12px;font-size:11px;border-color:var(--gold);color:var(--gold);">🔑 Promo Code</button>
-            <button onclick="handleSignOut()" class="btn-q" style="padding:7px 12px;font-size:11px;">Logout</button>
+            <a href="free-area.html" class="btn-o" style="padding:6px 10px;font-size:10px;">Free Area</a>
+            <a href="https://mygamescratch.vercel.app/vip-area.html" class="btn-g" style="padding:6px 12px;font-size:10px;">VIP Area</a>
+            <button onclick="openAuthModal('promo')" class="btn-o" style="padding:6px 10px;font-size:10px;border-color:var(--gold);color:var(--gold);">🔑 Code</button>
+            <button onclick="handleSignOut()" class="btn-q" style="padding:6px 10px;font-size:10px;">Logout</button>
           `;
         });
       } else {
         authButtons.forEach(el => {
           el.innerHTML = `
-            <a href="https://sites.google.com/view/mygamehelp" target="_top" class="btn-q" style="padding:7px 14px;font-size:11px;">Help</a>
-            <button onclick="openAuthModal('login')" class="btn-o" style="padding:7px 18px;font-size:11px;">Login</button>
-            <button onclick="openAuthModal('register')" class="btn-g" style="padding:7px 18px;font-size:11px;">Register</button>
+            <a href="https://sites.google.com/view/mygamehelp" target="_top" class="btn-q" style="padding:6px 12px;font-size:10px;">Help</a>
+            <button onclick="openAuthModal('login')" class="btn-o" style="padding:6px 14px;font-size:10px;">Login</button>
+            <button onclick="openAuthModal('register')" class="btn-g" style="padding:6px 14px;font-size:10px;">Register</button>
           `;
         });
       }
@@ -458,6 +450,43 @@
     .nav-links { display:flex; gap:16px; align-items:center; }
     .nav-links a.nav-item { color:var(--text-muted); text-decoration:none; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; transition:color 0.2s; }
     .nav-links a.nav-item:hover { color:var(--gold); }
+
+    /* MOBILE RESPONSIVE NAVIGATION FIX */
+    @media (max-width: 850px) {
+      nav {
+        padding: 12px 16px;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .nav-logo {
+        font-size: 16px;
+        letter-spacing: 4px;
+      }
+      .nav-links {
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+      }
+      .nav-links a.nav-item {
+        font-size: 10px;
+        padding: 2px 4px;
+      }
+      .auth-btns-group {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px !important;
+      }
+      .auth-btns-group .btn-g,
+      .auth-btns-group .btn-o,
+      .auth-btns-group .btn-q {
+        padding: 5px 8px !important;
+        font-size: 10px !important;
+      }
+      .hero {
+        padding-top: 150px;
+      }
+    }
 
     .hero { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:120px 24px 100px; position:relative; overflow:hidden; background:var(--dark); }
     .hero-badge { display:inline-flex; align-items:center; gap:8px; background:var(--gold-dim); border:1px solid rgba(194,157,76,0.3); color:var(--gold); font-size:11px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; padding:6px 18px; border-radius:100px; margin-bottom:32px; }
