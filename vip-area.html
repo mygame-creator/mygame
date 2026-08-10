@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP Members Area </title>
+    <title>VIP Members Area - Mygame Scratch</title>
     
     <!-- ANTI-CACHE META TAGS -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -159,16 +159,49 @@
             margin: 14px auto 0;
         }
 
-        .nav-quick-links {
-            display: flex; gap: 14px; justify-content: center; align-items: center; margin-top: 18px;
+        /* HEADER BUTTONS */
+        .header-action-btns {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
         }
-        .nav-quick-links a {
-            color: var(--text); font-size: 12px; font-weight: 600; text-decoration: none;
-            padding: 6px 14px; border-radius: 20px; border: 1px solid var(--card-border);
-            background: var(--card-bg); transition: all 0.2s ease;
+        .btn-rate-header {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--gold);
+            color: #0d0d0d;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 9px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 14px rgba(200, 169, 90, 0.25);
         }
-        .nav-quick-links a:hover {
-            border-color: var(--gold); color: var(--gold);
+        .btn-rate-header:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(200, 169, 90, 0.4);
+        }
+        .btn-view-ratings {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--card-border);
+            font-weight: 600;
+            font-size: 13px;
+            padding: 9px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .btn-view-ratings:hover {
+            border-color: var(--gold);
+            color: var(--gold);
         }
 
         .settings-container { position: absolute; top: 38px; right: 38px; z-index: 10000; }
@@ -209,21 +242,6 @@
             width: 100%; max-width: 580px; margin: 0 auto; padding: 0 20px 100px;
             display: flex; flex-direction: column; gap: 40px;
         }
-
-        /* CHATINGER-X CHAT BOX */
-        .chat-card {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 16px; overflow: hidden; width: 100%;
-            box-shadow: 0 4px 24px var(--shadow);
-        }
-        .chat-header {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 16px 20px 14px; border-bottom: 1px solid var(--card-border);
-        }
-        .chat-title { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--gold); }
-        .chat-sub { font-size: 11px; color: var(--subtext); }
-        .chat-iframe-wrap { width: 100%; height: 420px; background: #000; }
-        .chat-iframe-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
 
         /* GAMES SECTION */
         .game-card {
@@ -270,10 +288,92 @@
         .mobile-ok { background: #dcfce7; color: #15803d; }
         .desktop-only { background: #fef9c3; color: #854d0e; }
 
+        /* FLOATING CHAT WIDGET (BOTTOM RIGHT) */
+        .chat-floating-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), #b08a3e);
+            color: #0d0d0d;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.4), 0 0 12px rgba(200,169,90,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .chat-floating-btn:hover {
+            transform: scale(1.08) translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(200,169,90,0.5);
+        }
+
+        .chat-modal-popup {
+            display: none;
+            position: fixed;
+            bottom: 92px;
+            right: 24px;
+            z-index: 9998;
+            width: 380px;
+            max-width: calc(100vw - 32px);
+            height: 520px;
+            max-height: calc(100vh - 120px);
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+            flex-direction: column;
+            animation: chatSlideIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .chat-modal-popup.open {
+            display: flex;
+        }
+        @keyframes chatSlideIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .chat-popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--card-border);
+        }
+        .chat-popup-title {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--gold);
+        }
+        .chat-popup-close {
+            background: none;
+            border: none;
+            color: var(--subtext);
+            font-size: 18px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .chat-popup-close:hover {
+            color: var(--text);
+        }
+        .chat-popup-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
         @media (max-width: 540px) {
             .header h1 { font-size: 22px; padding: 0 50px; }
             .settings-container { top: 14px; right: 14px; }
             .game-badge { display: none; }
+            .chat-floating-btn { bottom: 18px; right: 18px; width: 52px; height: 52px; font-size: 20px; }
+            .chat-modal-popup { bottom: 80px; right: 16px; left: 16px; width: auto; }
         }
 
         .thankyou { width: 100%; max-width: 580px; margin: 0 auto; padding: 0 20px 80px; }
@@ -338,26 +438,15 @@
         <div class="header-eyebrow">Exclusive Access</div>
         <h1>VIP Members Area</h1>
         <div class="gold-divider"></div>
-        <div class="nav-quick-links">
-            <a href="rating-page.html">⭐ Rate Us</a>
-            <a href="rating-view.html">💬 View Ratings</a>
+        
+        <!-- HEADER BUTTONS FOR RATE US AND VIEW RATINGS -->
+        <div class="header-action-btns">
+            <a href="rating-page.html" class="btn-rate-header">⭐ Rate Us</a>
+            <a href="rating-view.html" class="btn-view-ratings">💬 View Ratings</a>
         </div>
     </div>
 
     <div class="main-wrapper">
-        <!-- COMMUNITY CHAT SECTION -->
-        <div class="chat-card">
-            <div class="chat-header">
-                <div>
-                    <div class="chat-title">💬 VIP Community Chat</div>
-                    <div class="chat-sub">Powered by ChatingerX (Created by Pranav Jha)</div>
-                </div>
-            </div>
-            <div class="chat-iframe-wrap">
-                <iframe src="https://chatinger-x.vercel.app/" allowfullscreen></iframe>
-            </div>
-        </div>
-
         <!-- Car Game -->
         <div class="game-card">
             <div class="game-header">
@@ -510,6 +599,17 @@
         </div>
     </div>
 
+    <!-- FLOATING CHAT BUTTON & MODAL -->
+    <button class="chat-floating-btn" onclick="toggleChatPopup()" title="Open Community Chat">💬</button>
+
+    <div class="chat-modal-popup" id="chatModalPopup">
+        <div class="chat-popup-header">
+            <span class="chat-popup-title">💬 VIP Community Chat</span>
+            <button class="chat-popup-close" onclick="toggleChatPopup()">✕</button>
+        </div>
+        <iframe class="chat-popup-iframe" src="https://chatinger-x.vercel.app/?chatId=xBRuou2Id6F27vb7auxB" allowfullscreen></iframe>
+    </div>
+
     <div class="thankyou">
         <div class="thankyou-inner">
             <div class="thankyou-icon">👑</div>
@@ -523,9 +623,16 @@
     <script>
         const dropdown = document.getElementById('themeDropdown');
         function toggleSettings() { dropdown.classList.toggle('show'); }
+        
+        const chatPopup = document.getElementById('chatModalPopup');
+        function toggleChatPopup() {
+            chatPopup.classList.toggle('open');
+        }
+
         window.onclick = function(e) {
             if (!e.target.closest('.settings-container')) dropdown.classList.remove('show');
         };
+        
         function setTheme(mode) {
             if (mode === 'system') {
                 document.documentElement.classList.toggle('light-mode',
