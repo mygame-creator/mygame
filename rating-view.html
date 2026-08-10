@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Community Ratings & Reviews - VIP Members Area</title>
-    <!-- BROWSER TAB FAVICON CODES -->
-<link rel="icon" type="image/png" sizes="32x32" href="/icon-192.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+    <title>Community Ratings - Mygame Scratch</title>
+    
+    <link rel="icon" type="image/png" sizes="32x32" href="/icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+
     <!-- ANTI-CACHE META TAGS -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -26,21 +27,6 @@
             --inst-bg: #1a1a1a;
             --inst-text: #aaaaaa;
             --gold: #c8a95a;
-            --accent: #e05c00;
-        }
-
-        html.light-mode {
-            --bg: #f2f2f7; 
-            --header-bg: rgba(255, 255, 255, 0.75); 
-            --text: #1c1c1e; 
-            --subtext: #8e8e93;
-            --card-bg: #ffffff; 
-            --card-border: #e5e5ea;
-            --shadow: rgba(0, 0, 0, 0.06); 
-            --inst-bg: #fafafa;
-            --inst-text: #3a3a3c;
-            --gold: #d97706; 
-            --accent: #ff3b30;
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -50,26 +36,19 @@
             font-family: 'DM Sans', sans-serif;
             background: var(--bg);
             color: var(--text);
-            transition: background 0.35s, color 0.35s;
         }
 
         .header {
-            position: relative;
             width: 100%;
             padding: 40px 20px 30px;
             text-align: center;
             background: var(--header-bg);
             border-bottom: 1px solid var(--card-border);
             margin-bottom: 30px;
-            box-shadow: 0 2px 16px var(--shadow);
-        }
-        .header-eyebrow {
-            font-weight: 400; letter-spacing: 5px; font-size: 11px;
-            text-transform: uppercase; color: var(--gold); margin-bottom: 8px;
         }
         .header h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 30px; letter-spacing: 1.5px;
+            font-size: 30px;
             color: var(--text);
         }
         .gold-divider {
@@ -78,16 +57,13 @@
             margin: 12px auto 0;
         }
 
-        .nav-back-container {
+        .nav-actions {
             display: flex;
             justify-content: center;
             gap: 12px;
             margin-top: 18px;
         }
-        .btn-back, .btn-rate-new {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+        .btn-action {
             padding: 8px 18px;
             border-radius: 20px;
             font-size: 13px;
@@ -101,11 +77,10 @@
             border: 1px solid var(--card-border);
         }
         .btn-back:hover { border-color: var(--gold); color: var(--gold); }
-        .btn-rate-new {
+        .btn-rate {
             background: var(--gold);
             color: #0d0d0d;
         }
-        .btn-rate-new:hover { transform: translateY(-1px); }
 
         .container {
             width: 100%;
@@ -114,55 +89,30 @@
             padding: 0 20px 80px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
-        }
-
-        .user-status-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 14px 20px;
-            font-size: 13.5px;
-            color: var(--subtext);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .user-status-card strong {
-            color: var(--gold);
-        }
-
-        .ratings-list {
-            display: flex;
-            flex-direction: column;
             gap: 16px;
         }
 
-        .rating-item {
+        .rating-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 14px;
             padding: 20px;
             box-shadow: 0 4px 16px var(--shadow);
-            transition: transform 0.2s;
-        }
-        .rating-item:hover {
-            transform: translateY(-2px);
         }
 
-        .rating-item-header {
+        .card-top {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 10px;
         }
 
-        .author-info {
+        .user-details {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        .avatar {
+        .user-avatar {
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -172,79 +122,60 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 14px;
             color: var(--gold);
         }
-        .author-name {
-            font-weight: 600;
+        .user-name {
+            font-weight: 700;
             font-size: 15px;
             color: var(--text);
         }
-        .rating-stars {
+
+        .star-display {
             color: var(--gold);
             font-size: 15px;
             letter-spacing: 2px;
         }
 
-        .rating-comment {
+        .review-text {
             font-size: 14.5px;
             line-height: 1.6;
             color: var(--inst-text);
+            margin-top: 8px;
             word-break: break-word;
         }
 
-        .rating-date {
+        .rating-time {
             font-size: 11px;
             color: var(--subtext);
-            margin-top: 12px;
+            margin-top: 10px;
             text-align: right;
         }
 
-        .no-ratings {
+        .empty-state {
             text-align: center;
-            padding: 40px 20px;
+            padding: 40px;
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 14px;
             color: var(--subtext);
-            font-size: 14px;
-        }
-
-        .loading-spinner {
-            text-align: center;
-            padding: 40px;
-            color: var(--gold);
-            font-weight: 500;
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="header-eyebrow">VIP Community Feedback</div>
-        <h1>Member Ratings & Reviews</h1>
+        <h1>Community Ratings & Reviews</h1>
         <div class="gold-divider"></div>
-
-        <div class="nav-back-container">
-            <a href="vip-area.html" class="btn-back">← Back to VIP Area</a>
-            <a href="rating-page.html" class="btn-rate-new">⭐ Leave a Rating</a>
+        <div class="nav-actions">
+            <a href="vip-area.html" class="btn-action btn-back">← Back to VIP Area</a>
+            <a href="rating-page.html" class="btn-action btn-rate">⭐ Leave a Rating</a>
         </div>
     </div>
 
-    <div class="container">
-        <!-- CURRENT LOGGED-IN USER DISPLAY -->
-        <div class="user-status-card">
-            <span>Viewing as: <strong id="currentUserName">Loading user...</strong></span>
-            <span>👑 VIP Status Active</span>
-        </div>
-
-        <!-- RATINGS CONTAINER -->
-        <div id="ratingsContainer" class="ratings-list">
-            <div class="loading-spinner">Loading community reviews...</div>
-        </div>
+    <div class="container" id="ratingsList">
+        <div class="empty-state">Loading ratings...</div>
     </div>
 
-    <!-- FIREBASE INTEGRATION -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
@@ -263,101 +194,76 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Clean double quotes from text strings
-        function cleanText(text) {
-            if (!text) return "";
-            return String(text).replace(/^["']+|["']+$|^"|"$/g, '').trim();
+        // Sanitize text strings and strip external quotes
+        function clean(str) {
+            if (!str) return "";
+            return String(str).replace(/^["']+|["']+$|^"|"$/g, '').trim();
         }
 
-        // Extract user display name or format username from email
-        function getUserDisplayName(user) {
-            if (!user) return "Anonymous VIP";
-            if (user.displayName && user.displayName.trim() !== "") {
-                return cleanText(user.displayName);
-            }
-            if (user.email) {
-                const username = user.email.split('@')[0];
-                return cleanText(username);
-            }
-            return "VIP Member";
+        function getStars(count) {
+            const num = parseInt(count) || 5;
+            return "★".repeat(Math.min(5, Math.max(1, num))) + "☆".repeat(5 - Math.min(5, Math.max(1, num)));
         }
 
-        // Render Star Icons
-        function renderStars(ratingCount) {
-            const count = parseInt(ratingCount) || 5;
-            return "★".repeat(Math.min(5, Math.max(1, count))) + "☆".repeat(5 - Math.min(5, Math.max(1, count)));
-        }
-
-        // Track Auth State & Display Current Logged-In User Name
         onAuthStateChanged(auth, (user) => {
-            const userNameEl = document.getElementById('currentUserName');
-            if (user) {
-                userNameEl.textContent = getUserDisplayName(user);
-            } else {
+            if (!user) {
                 window.location.replace("https://mygamescratch.vercel.app/");
+            } else {
+                loadRatings();
             }
         });
 
-        // Load & Display Ratings without Double Quotes
         async function loadRatings() {
-            const container = document.getElementById('ratingsContainer');
+            const container = document.getElementById('ratingsList');
             try {
-                const ratingsRef = collection(db, "ratings");
-                const q = query(ratingsRef, orderBy("createdAt", "desc"));
-                const querySnapshot = await getDocs(q);
+                const q = query(collection(db, "ratings"), orderBy("createdAt", "desc"));
+                const snapshot = await getDocs(q);
 
-                if (querySnapshot.empty) {
-                    container.innerHTML = `<div class="no-ratings">No reviews submitted yet. Be the first to leave one!</div>`;
+                if (snapshot.empty) {
+                    container.innerHTML = `<div class="empty-state">No ratings found yet. Be the first to leave one!</div>`;
                     return;
                 }
 
                 let html = '';
-                querySnapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
                     
-                    // Sanitize & remove quotes
+                    // Fetch user name fallback logic
                     const rawName = data.userName || data.user || data.email || "VIP Member";
-                    const cleanName = cleanText(rawName);
+                    const cleanName = clean(rawName);
                     
-                    const rawComment = data.comment || data.review || data.ratingText || "";
-                    const cleanCommentText = cleanText(rawComment);
-                    
-                    const starCount = data.stars || data.rating || 5;
-                    const firstInitial = cleanName.charAt(0).toUpperCase() || "V";
-                    
-                    // Format Date
-                    let dateStr = "";
+                    // Fetch text with proper field checking so comments appear
+                    const rawText = data.ratingText || data.comment || data.review || "";
+                    const cleanReviewText = clean(rawText);
+
+                    const stars = data.stars || data.rating || 5;
+                    const initial = cleanName.charAt(0).toUpperCase() || "V";
+
+                    let timeStr = "";
                     if (data.createdAt && data.createdAt.toDate) {
-                        dateStr = data.createdAt.toDate().toLocaleDateString(undefined, {
-                            year: 'numeric', month: 'short', day: 'numeric'
-                        });
+                        timeStr = data.createdAt.toDate().toLocaleDateString();
                     }
 
                     html += `
-                        <div class="rating-item">
-                            <div class="rating-item-header">
-                                <div class="author-info">
-                                    <div class="avatar">${firstInitial}</div>
-                                    <div class="author-name">${cleanName}</div>
+                        <div class="rating-card">
+                            <div class="card-top">
+                                <div class="user-details">
+                                    <div class="user-avatar">${initial}</div>
+                                    <div class="user-name">${cleanName}</div>
                                 </div>
-                                <div class="rating-stars">${renderStars(starCount)}</div>
+                                <div class="star-display">${getStars(stars)}</div>
                             </div>
-                            <div class="rating-comment">${cleanCommentText}</div>
-                            ${dateStr ? `<div class="rating-date">${dateStr}</div>` : ''}
+                            <div class="review-text">${cleanReviewText ? cleanReviewText : "<i>No comment provided.</i>"}</div>
+                            ${timeStr ? `<div class="rating-time">${timeStr}</div>` : ''}
                         </div>
                     `;
                 });
 
                 container.innerHTML = html;
-
-            } catch (error) {
-                console.error("Error fetching ratings:", error);
-                container.innerHTML = `<div class="no-ratings">Unable to load reviews right now. Please try refreshing.</div>`;
+            } catch (err) {
+                container.innerHTML = `<div class="empty-state">Error loading ratings: ${err.message}</div>`;
             }
         }
-
-        // Trigger loading ratings
-        loadRatings();
     </script>
 </body>
 </html>
