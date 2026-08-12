@@ -1,691 +1,180 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mygame Scratch - Free Online Games by Akshat</title>
-  
-  <link rel="icon" type="image/png" sizes="32x32" href="https://mygamescratch.vercel.app/icon-192.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="https://mygamescratch.vercel.app/icon-192.png">
-  <link rel="apple-touch-icon" href="https://mygamescratch.vercel.app/icon-192.png">
-
-  <meta name="author" content="Akshat a young web developer">
-  <meta name="description" content="Mygame Scratch is a web gaming platform created and developed by Akshat, featuring free interactive online Scratch games.">
-  <meta name="keywords" content="mygame, mygamescratch, scratch, mygamescratch.vercel.app, games, Akshat, web developer, game developer">
-  <meta name="application-name" content="Mygame">
-  <meta name="apple-mobile-web-app-title" content="Mygame">
-
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#c29d4c">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-  <script>
-    window.deferredPrompt = null;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      window.deferredPrompt = e;
-      const btn = document.getElementById('pwa-install-btn');
-      if (btn) btn.style.display = 'inline-block';
-    });
-  </script>
-
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B1HQG0KC8Z"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-B1HQG0KC8Z');
-  </script>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
-    import { 
-      getAuth, 
-      createUserWithEmailAndPassword, 
-      signInWithEmailAndPassword, 
-      sendPasswordResetEmail,
-      GoogleAuthProvider,
-      OAuthProvider,
-      signInWithPopup,
-      onAuthStateChanged,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-    import { 
-      getFirestore, 
-      doc, 
-      setDoc, 
-      getDoc,
-      updateDoc,
-      collection,
-      addDoc,
-      query,
-      where,
-      getDocs
-    } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCf0Pfa0HOV4ciAVtqwLVNq_gLcCtAAk8Q",
-      authDomain: "mygamescratch.firebaseapp.com",
-      projectId: "mygamescratch",
-      storageBucket: "mygamescratch.firebasestorage.app",
-      messagingSenderId: "256549154945",
-      appId: "1:256549154945:web:aa29c54bf7036cb3f65d80",
-      measurementId: "G-K8RS2L4P3V"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const googleProvider = new GoogleAuthProvider();
-
-    const MY_ADMIN_EMAIL = "akshatnahata24@gmail.com";
-
-    async function ensureUserDocExists(user, username = null) {
-      const userRef = doc(db, "users", user.uid);
-      const docSnap = await getDoc(userRef);
-      if (!docSnap.exists()) {
-        await setDoc(userRef, {
-          email: user.email.toLowerCase(),
-          username: username || user.displayName || (user.email ? user.email.split('@')[0] : "User"),
-          tier: "free",
-          promoExpiry: null,
-          createdAt: new Date().toISOString()
-        });
-      }
-    }
-
-    // Google Sign-In
-    window.handleGoogleSignIn = async function() {
-      try {
-        const result = await signInWithPopup(auth, googleProvider);
-        await ensureUserDocExists(result.user);
-        closeAuthModal();
-      } catch (error) {
-        alert('Google Sign-In Error: ' + error.message);
-      }
-    };
-
-    // Apple Sign-In
-    window.handleAppleSignIn = async function() {
-      const appleProvider = new OAuthProvider('apple.com');
-      appleProvider.addScope('email');
-      appleProvider.addScope('name');
-      try {
-        const result = await signInWithPopup(auth, appleProvider);
-        await ensureUserDocExists(result.user);
-        closeAuthModal();
-      } catch (error) {
-        alert('Apple Sign-In Error: ' + error.message);
-      }
-    };
-
-    window.openAuthModal = function(mode) {
-      const modal = document.getElementById('auth-modal');
-      const title = document.getElementById('auth-title');
-      const usernameGroup = document.getElementById('username-group');
-      const passwordGroup = document.getElementById('password-group');
-      const promoGroup = document.getElementById('promocode-group');
-      const resetLink = document.getElementById('forgot-link');
-      const submitBtn = document.getElementById('auth-submit-btn');
-      const socialGroup = document.getElementById('social-btns');
-      const divider = document.getElementById('modal-divider');
-
-      document.getElementById('auth-mode').value = mode;
-      modal.style.display = 'flex';
-
-      // Reset visibilities
-      usernameGroup.style.display = 'none';
-      passwordGroup.style.display = 'block';
-      promoGroup.style.display = 'none';
-      resetLink.style.display = 'none';
-      socialGroup.style.display = 'flex';
-      divider.style.display = 'flex';
-
-      if (mode === 'register') {
-        title.textContent = 'Create Account';
-        usernameGroup.style.display = 'block';
-        submitBtn.textContent = 'Register';
-      } else if (mode === 'login') {
-        title.textContent = 'Welcome Back';
-        resetLink.style.display = 'inline-block';
-        submitBtn.textContent = 'Login';
-      } else if (mode === 'reset') {
-        title.textContent = 'Reset Password';
-        passwordGroup.style.display = 'none';
-        socialGroup.style.display = 'none';
-        divider.style.display = 'none';
-        submitBtn.textContent = 'Send Reset Link';
-      } else if (mode === 'promo') {
-        title.textContent = 'Redeem Promo / Test Code';
-        passwordGroup.style.display = 'none';
-        promoGroup.style.display = 'block';
-        socialGroup.style.display = 'none';
-        divider.style.display = 'none';
-        submitBtn.textContent = 'Redeem Code';
-      }
-    };
-
-    window.closeAuthModal = function() {
-      document.getElementById('auth-modal').style.display = 'none';
-      document.getElementById('auth-form').reset();
-    };
-
-    window.handleAuthForm = async function(e) {
-      e.preventDefault();
-      const mode = document.getElementById('auth-mode').value;
-      const email = document.getElementById('auth-email').value;
-      const password = document.getElementById('auth-password').value;
-      const username = document.getElementById('auth-username').value;
-      const promoCode = document.getElementById('auth-promocode').value.trim().toUpperCase();
-
-      try {
-        if (mode === 'register') {
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          await ensureUserDocExists(userCredential.user, username);
-          closeAuthModal();
-        } else if (mode === 'login') {
-          const userCredential = await signInWithEmailAndPassword(auth, email, password);
-          await ensureUserDocExists(userCredential.user);
-          closeAuthModal();
-        } else if (mode === 'reset') {
-          await sendPasswordResetEmail(auth, email);
-          alert('Password reset link sent to your email!');
-          closeAuthModal();
-        } else if (mode === 'promo') {
-          const currentUser = auth.currentUser;
-          if (!currentUser) {
-            alert("Please log in or register an account first to redeem a promo code.");
-            return;
-          }
-          if (!promoCode) {
-            alert("Please enter a valid promo code.");
-            return;
-          }
-
-          const q = query(collection(db, "promo_codes"), where("code", "==", promoCode), where("status", "==", "active"));
-          const querySnapshot = await getDocs(q);
-
-          if (querySnapshot.empty) {
-            alert("Invalid, expired, or already used promo code.");
-            return;
-          }
-
-          const codeDoc = querySnapshot.docs[0];
-          
-          await updateDoc(doc(db, "promo_codes", codeDoc.id), {
-            status: "used",
-            usedBy: currentUser.email,
-            usedAt: new Date().toISOString()
-          });
-
-          const expiryDate = new Date();
-          expiryDate.setDate(expiryDate.getDate() + 30);
-
-          await updateDoc(doc(db, "users", currentUser.uid), {
-            tier: "promo",
-            promoExpiry: expiryDate.toISOString()
-          });
-
-          alert("🎉 Code successfully redeemed! You now have 30 days of VIP access.");
-          closeAuthModal();
-          window.location.href = "https://mygamescratch.vercel.app/vip-area.html";
-        }
-      } catch (error) {
-        alert('Authentication Error: ' + error.message);
-      }
-    };
-
-    window.handleSignOut = function() {
-      signOut(auth).then(() => {
-        alert('Signed out successfully.');
-      });
-    };
-
-    window.openAdminModal = function() {
-      if (!auth.currentUser || auth.currentUser.email.toLowerCase() !== MY_ADMIN_EMAIL.toLowerCase()) {
-        alert("Access Denied: Admin privileges required.");
-        return;
-      }
-      document.getElementById('admin-modal').style.display = 'flex';
-      loadAdminCodes();
-      loadAdminPromoUsers();
-    };
-
-    window.closeAdminModal = function() {
-      document.getElementById('admin-modal').style.display = 'none';
-    };
-
-    window.generatePromoCode = async function() {
-      const code = "MYGAME-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-      try {
-        await addDoc(collection(db, "promo_codes"), {
-          code: code,
-          status: "active",
-          createdBy: MY_ADMIN_EMAIL,
-          createdAt: new Date().toISOString()
-        });
-        alert(`New Code Generated: ${code}\n\nThis code will expire instantly once redeemed and grants 30 days of VIP access.`);
-        loadAdminCodes();
-      } catch (e) {
-        alert("Error generating code: " + e.message);
-      }
-    };
-
-    window.loadAdminCodes = async function() {
-      const listContainer = document.getElementById('admin-codes-list');
-      listContainer.innerHTML = '<p style="font-size:12px;color:var(--text-muted);">Loading active codes...</p>';
-      try {
-        const q = query(collection(db, "promo_codes"), where("status", "==", "active"));
-        const snapshot = await getDocs(q);
-        if (snapshot.empty) {
-          listContainer.innerHTML = '<p style="font-size:12px;color:var(--text-muted);">No active unused codes.</p>';
-          return;
-        }
-        let html = '<ul style="list-style:none;padding:0;">';
-        snapshot.forEach(docSnap => {
-          const c = docSnap.data();
-          html += `<li style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:13px;color:var(--gold);">
-            <strong>${c.code}</strong> <span style="font-size:11px;color:var(--text-muted);">(Unused)</span>
-          </li>`;
-        });
-        html += '</ul>';
-        listContainer.innerHTML = html;
-      } catch (e) {
-        listContainer.innerHTML = 'Error loading codes: ' + e.message;
-      }
-    };
-
-    window.loadAdminPromoUsers = async function() {
-      const userListContainer = document.getElementById('admin-promo-users-list');
-      userListContainer.innerHTML = '<p style="font-size:12px;color:var(--text-muted);">Loading promo accounts...</p>';
-      try {
-        const q = query(collection(db, "users"), where("tier", "==", "promo"));
-        const snapshot = await getDocs(q);
-        if (snapshot.empty) {
-          userListContainer.innerHTML = '<p style="font-size:12px;color:var(--text-muted);">No active promo code users found.</p>';
-          return;
-        }
-        let html = '<ul style="list-style:none;padding:0;">';
-        snapshot.forEach(docSnap => {
-          const u = docSnap.data();
-          const uid = docSnap.id;
-          const expDate = u.promoExpiry ? new Date(u.promoExpiry).toLocaleDateString() : 'N/A';
-          html += `<li style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:12px;">
-            <span><strong>${u.email}</strong><br><small style="color:var(--text-muted);">Expires: ${expDate}</small></span>
-            <button onclick="terminatePromoAccount('${uid}')" style="background:#dc2626;color:#fff;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:700;">Terminate</button>
-          </li>`;
-        });
-        html += '</ul>';
-        userListContainer.innerHTML = html;
-      } catch (e) {
-        userListContainer.innerHTML = 'Error loading users: ' + e.message;
-      }
-    };
-
-    window.terminatePromoAccount = async function(uid) {
-      if (!confirm("Are you sure you want to terminate this promo user's VIP access immediately?")) return;
-      try {
-        await updateDoc(doc(db, "users", uid), {
-          tier: "free",
-          promoExpiry: null
-        });
-        alert("Account terminated and downgraded to Free Tier.");
-        loadAdminPromoUsers();
-      } catch (e) {
-        alert("Error terminating account: " + e.message);
-      }
-    };
-
-    onAuthStateChanged(auth, async (user) => {
-      const authButtons = document.querySelectorAll('.auth-btns-group');
-      if (user) {
-        await ensureUserDocExists(user);
-
-        const isAdmin = user.email && user.email.toLowerCase() === MY_ADMIN_EMAIL.toLowerCase();
-
-        const userRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(userRef);
-        if (docSnap.exists()) {
-          const uData = docSnap.data();
-          if (uData.tier === "promo" && uData.promoExpiry) {
-            if (new Date(uData.promoExpiry) < new Date()) {
-              await updateDoc(userRef, { tier: "free", promoExpiry: null });
-            }
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyGame Scratch - Home</title>
+    
+    <!-- FAVICON / TAB ICON -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <!-- ANTI-CACHE META TAGS -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #0d0d0d;
+            --text: #f0ece4;
+            --card-bg: #161616;
+            --card-border: #2a2a2a;
+            --gold: #c8a95a;
+            --subtext: #777;
         }
 
-        const adminBtn = isAdmin 
-          ? `<button onclick="openAdminModal()" class="btn-g" style="background:#dc2626;color:#fff;padding:6px 12px;font-size:10px;border:none;">⚙️ Admin</button>` 
-          : '';
+        body {
+            min-height: 100vh;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
 
-        authButtons.forEach(el => {
-          el.innerHTML = `
-            ${adminBtn}
-            <a href="free-area.html" class="btn-o" style="padding:6px 10px;font-size:10px;">Free Area</a>
-            <a href="https://mygamescratch.vercel.app/vip-area.html" class="btn-g" style="padding:6px 12px;font-size:10px;">VIP Area</a>
-            <button onclick="openAuthModal('promo')" class="btn-o" style="padding:6px 10px;font-size:10px;border-color:var(--gold);color:var(--gold);">🔑 Code</button>
-            <button onclick="handleSignOut()" class="btn-q" style="padding:6px 10px;font-size:10px;">Logout</button>
-          `;
-        });
-      } else {
-        authButtons.forEach(el => {
-          el.innerHTML = `
-            <a href="https://sites.google.com/view/mygamehelp" target="_top" class="btn-q" style="padding:6px 12px;font-size:10px;">Help</a>
-            <button onclick="openAuthModal('login')" class="btn-o" style="padding:6px 14px;font-size:10px;">Login</button>
-            <button onclick="openAuthModal('register')" class="btn-g" style="padding:6px 14px;font-size:10px;">Register</button>
-          `;
-        });
-      }
-    });
-  </script>
+        .container {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 40px 32px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
 
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    :root {
-      --gold: #c29d4c; --gold-light: #d4b060; --gold-dim: rgba(194,157,76,0.15);
-      --dark: #0a0a0a; --dark2: #111; --text: #ffffff; --text-muted: rgba(255,255,255,0.42);
-    }
-    body { background:var(--dark); font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:var(--text); overflow-x:hidden; }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
 
-    #auth-modal, #admin-modal { position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); }
-    .modal-box { background:var(--dark2); border:1px solid rgba(194,157,76,0.3); padding:36px; border-radius:8px; width:100%; max-width:400px; position:relative; }
-    .close-modal { position:absolute; top:14px; right:18px; color:var(--text-muted); font-size:20px; cursor:pointer; background:none; border:none; }
-    .modal-title { font-size:20px; font-weight:800; color:var(--gold); letter-spacing:2px; margin-bottom:20px; text-align:center; }
-    .form-group { margin-bottom:16px; }
-    .form-group label { display:block; font-size:11px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
-    .form-group input { width:100%; padding:10px 14px; background:rgba(255,255,255,0.05); border:1px solid rgba(194,157,76,0.25); border-radius:4px; color:#fff; font-size:14px; outline:none; font-family:inherit; }
+        p {
+            color: var(--subtext);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
 
-    .modal-links { text-align:right; margin-bottom:16px; margin-top:-6px; }
-    .modal-links a { font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:12px; color:var(--gold); text-decoration:none; cursor:pointer; transition:opacity 0.2s; }
-    .modal-links a:hover { opacity:0.8; text-decoration:underline; }
+        .promo-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
 
-    .divider { display:flex; align-items:center; text-align:center; margin:16px 0; color:var(--text-muted); font-size:11px; letter-spacing:1px; }
-    .divider::before, .divider::after { content:''; flex:1; border-bottom:1px solid rgba(255,255,255,0.1); }
-    .divider::before { margin-right:10px; } .divider::after { margin-left:10px; }
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: #1a1a1a;
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+        }
 
-    .social-btn-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
-    .btn-google, .btn-apple { width:100%; padding:10px; border:none; border-radius:4px; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; font-family:inherit; }
-    .btn-google { background:#ffffff; color:#000000; }
-    .btn-apple { background:#000000; color:#ffffff; border: 1px solid rgba(255,255,255,0.2); }
-    .btn-google svg, .btn-apple svg { width:18px; height:18px; }
+        input[type="text"]:focus {
+            border-color: var(--gold);
+        }
 
-    #cd-screen { position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; flex-direction:column; background:var(--dark); transition:opacity 0.9s ease, transform 0.9s ease; }
-    #cd-screen.hide { opacity:0; pointer-events:none; transform:scale(1.05); }
+        button.apply-btn {
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            background: var(--gold);
+            color: #0d0d0d;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
 
-    .grid-bg { position:absolute; inset:0; background-image: linear-gradient(rgba(194,157,76,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(194,157,76,0.05) 1px, transparent 1px); background-size:48px 48px; }
-    .glow { position:absolute; width:520px; height:520px; border-radius:50%; background:radial-gradient(circle, rgba(194,157,76,0.1) 0%, transparent 68%); top:50%; left:50%; transform:translate(-50%,-50%); animation:pulse 3.5s ease-in-out infinite; }
-    @keyframes pulse { 0%,100%{opacity:0.5;transform:translate(-50%,-50%) scale(1)} 50%{opacity:1;transform:translate(-50%,-50%) scale(1.12)} }
+        button.apply-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
 
-    .cd-inner { position:relative; z-index:2; text-align:center; padding:0 24px; }
-    .badge { display:inline-block; background:var(--gold-dim); border:1px solid rgba(194,157,76,0.4); color:var(--gold); font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; padding:6px 20px; border-radius:100px; margin-bottom:28px; }
-    .big-title { font-size:clamp(54px,11vw,90px); font-weight:900; letter-spacing:14px; line-height:1; }
-    .gold-bar { width:72px; height:3px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin:18px auto 14px; }
-    .sub { color:var(--text-muted); font-size:12px; letter-spacing:2.5px; text-transform:uppercase; margin-bottom:44px; }
+        .vip-btn {
+            display: inline-block;
+            width: 100%;
+            padding: 14px;
+            margin-top: 15px;
+            background: linear-gradient(135deg, #c8a95a, #e05c00);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(200, 169, 90, 0.3);
+            transition: transform 0.2s;
+        }
 
-    .cd-nums { display:flex; gap:18px; align-items:center; justify-content:center; margin-bottom:50px; }
-    .cd-box { display:flex; flex-direction:column; align-items:center; gap:8px; }
-    .cd-num { width:70px; height:70px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); border:1px solid rgba(194,157,76,0.28); border-radius:8px; font-size:30px; font-weight:800; }
-    .cd-lbl { font-size:10px; color:rgba(194,157,76,0.65); letter-spacing:1.5px; text-transform:uppercase; }
-    .cd-col { font-size:26px; color:rgba(194,157,76,0.35); font-weight:200; margin-top:22px; }
+        .vip-btn:hover {
+            transform: translateY(-2px);
+        }
 
-    .live-msg { display:none; font-size:20px; font-weight:700; color:var(--gold); letter-spacing:3px; text-transform:uppercase; margin-bottom:36px; }
-
-    .btn-row { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; align-items:center; }
-    .btn-g { background:var(--gold); color:#0a0a0a; padding:13px 30px; border-radius:4px; font-size:13px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; text-decoration:none; border:none; cursor:pointer; }
-    .btn-o { background:transparent; color:var(--gold); padding:12px 28px; border-radius:4px; font-size:13px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; text-decoration:none; border:1px solid var(--gold); cursor:pointer; }
-    .btn-q { background:transparent; color:var(--text-muted); padding:12px 18px; border-radius:4px; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; text-decoration:none; border:1px solid rgba(255,255,255,0.14); cursor:pointer; }
-
-    #homepage { display:none; opacity:0; transition:opacity 0.9s ease 0.2s; }
-    #homepage.show { display:block; opacity:1; }
-
-    nav {
-      position:fixed; top:0; left:0; right:0; z-index:50; display:flex; justify-content:space-between; align-items:center;
-      padding:16px 40px; background:rgba(10,10,10,0.88); backdrop-filter:blur(14px); border-bottom:1px solid rgba(194,157,76,0.08);
-    }
-    .nav-logo { font-size:18px; font-weight:900; letter-spacing:6px; text-decoration:none; color:var(--text); }
-    .nav-logo span { color:var(--gold); }
-    .nav-links { display:flex; gap:16px; align-items:center; }
-    .nav-links a.nav-item { color:var(--text-muted); text-decoration:none; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; transition:color 0.2s; }
-    .nav-links a.nav-item:hover { color:var(--gold); }
-
-    /* MOBILE RESPONSIVE NAVIGATION FIX */
-    @media (max-width: 850px) {
-      nav {
-        padding: 12px 16px;
-        flex-direction: column;
-        gap: 10px;
-      }
-      .nav-logo {
-        font-size: 16px;
-        letter-spacing: 4px;
-      }
-      .nav-links {
-        gap: 8px;
-        flex-wrap: wrap;
-        justify-content: center;
-        width: 100%;
-      }
-      .nav-links a.nav-item {
-        font-size: 10px;
-        padding: 2px 4px;
-      }
-      .auth-btns-group {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 6px !important;
-      }
-      .auth-btns-group .btn-g,
-      .auth-btns-group .btn-o,
-      .auth-btns-group .btn-q {
-        padding: 5px 8px !important;
-        font-size: 10px !important;
-      }
-      .hero {
-        padding-top: 150px;
-      }
-    }
-
-    .hero { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:120px 24px 100px; position:relative; overflow:hidden; background:var(--dark); }
-    .hero-badge { display:inline-flex; align-items:center; gap:8px; background:var(--gold-dim); border:1px solid rgba(194,157,76,0.3); color:var(--gold); font-size:11px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; padding:6px 18px; border-radius:100px; margin-bottom:32px; }
-    .dot { width:7px; height:7px; border-radius:50%; background:var(--gold); animation:blink 1.3s infinite; }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
-
-    .hero-title { font-size:clamp(66px,13vw,108px); font-weight:900; letter-spacing:16px; line-height:1; position:relative; z-index:2; }
-    .hero-sub { color:var(--text-muted); font-size:13px; letter-spacing:3px; text-transform:uppercase; margin:22px 0 44px; position:relative; z-index:2; }
-    .hero-btns { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; position:relative; z-index:2; }
-
-    .about-section { padding:100px 24px; background:var(--dark); border-bottom:1px solid rgba(194,157,76,0.08); text-align:center; }
-    .about-container { max-width:680px; margin:0 auto; }
-    .about-label { color:var(--gold); font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:12px; }
-    .about-title { font-size:clamp(26px,4vw,38px); font-weight:800; letter-spacing:3px; margin-bottom:16px; }
-    .about-bio { color:var(--text-muted); font-size:15px; line-height:1.8; margin-bottom:24px; }
-
-    .credits-box { margin-top: 36px; padding: 20px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(194, 157, 76, 0.2); border-radius: 8px; }
-    .credits-box h3 { font-size: 12px; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
-    .credits-box p { font-size: 13.5px; color: var(--text-muted); line-height: 1.6; }
-    .credits-box a { color: var(--gold); text-decoration: none; font-weight: 600; }
-
-    footer { border-top:1px solid rgba(194,157,76,0.08); padding:28px 40px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; background:rgba(0,0,0,0.3); }
-    .footer-logo { font-size:16px; font-weight:900; letter-spacing:6px; }
-    .footer-logo span { color:var(--gold); }
-    .footer-copy { font-size:12px; color:var(--text-muted); letter-spacing:1px; }
-    .footer-links { display:flex; gap:20px; }
-    .footer-links a { color:var(--text-muted); text-decoration:none; font-size:12px; letter-spacing:1px; }
-  </style>
+        .status-msg {
+            font-size: 13px;
+            margin-top: 6px;
+        }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+    </style>
 </head>
 <body>
 
-<!-- AUTHENTICATION MODAL -->
-<div id="auth-modal">
-  <div class="modal-box">
-    <button class="close-modal" onclick="closeAuthModal()">✕</button>
-    <div class="modal-title" id="auth-title">Account</div>
-    
-    <div class="social-btn-group" id="social-btns">
-      <button type="button" class="btn-google" onclick="handleGoogleSignIn()">
-        <svg viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.15C3.26 21.3 7.31 24 12 24z"/>
-          <path fill="#FBBC05" d="M5.28 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.61H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.39l3.99-3.15z"/>
-          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.61l3.99 3.15c.95-2.85 3.6-4.96 6.72-4.96z"/>
-        </svg>
-        Continue with Google
-      </button>
+    <div class="container">
+        <h1>MyGame Scratch</h1>
+        <p>Enter your promo code to unlock exclusive VIP Members Area access.</p>
 
-      <button type="button" class="btn-apple" onclick="handleAppleSignIn()">
-        <svg viewBox="0 0 170 170" fill="currentColor">
-          <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.34.13-9.16-1.9-14.49-6.08-3.48-2.8-7.38-7.55-11.7-14.26-6.19-9.63-11.12-20.2-14.78-31.72-3.66-11.52-5.49-22.37-5.49-32.56 0-14.2 3.49-26.06 10.47-35.58 6.98-9.52 15.82-14.38 26.52-14.58 4.79 0 10.02 1.25 15.69 3.75 5.67 2.5 9.77 3.75 12.3 3.75 2.18 0 6.17-1.22 11.98-3.66 5.81-2.44 11.14-3.58 15.99-3.41 11.75.65 21.03 4.88 27.84 12.69-10.45 6.32-15.54 15.11-15.27 26.37.27 8.71 3.59 15.99 9.96 21.84 6.37 5.85 13.88 9.38 22.53 10.59-2.29 6.86-5.45 13.62-9.48 20.28zM119.22 31.84c0-6.75 2.45-13.38 7.35-19.89 4.9-6.51 11.12-10.87 18.66-13.08.65 6.75-1.58 13.38-6.69 19.89-5.11 6.51-11.4 10.87-18.87 13.08-.13-.33-.29-.86-.45-1.6-.16-.74-.24-1.39-.24-1.96z"/>
-        </svg>
-        Continue with Apple
-      </button>
+        <div class="promo-box">
+            <input type="text" id="promoInput" placeholder="Enter Promo Code...">
+            <button class="apply-btn" onclick="submitPromoCode()">Apply</button>
+        </div>
+        <div id="statusMsg" class="status-msg"></div>
+
+        <!-- VIP Area Link (Removed/Hidden automatically if no promo code is present) -->
+        <a href="vip-area.html" id="vipAreaBtn" class="vip-btn" style="display: none;">👑 Go to VIP Area</a>
     </div>
 
-    <div class="divider" id="modal-divider">OR</div>
+    <script>
+        // Detection Script: Shows VIP Area button if promo code exists; hides/removes it if missing
+        function detectPromoCode() {
+            const savedPromo = localStorage.getItem('vip_promo_code');
+            const vipBtn = document.getElementById('vipAreaBtn');
+            const statusMsg = document.getElementById('statusMsg');
 
-    <form id="auth-form" onsubmit="handleAuthForm(event)">
-      <input type="hidden" id="auth-mode" value="login">
-      <div class="form-group" id="username-group" style="display:none;"><label>Username</label><input type="text" id="auth-username"></div>
-      <div class="form-group" id="email-group"><label>Email Address</label><input type="email" id="auth-email" required></div>
-      <div class="form-group" id="password-group"><label>Password</label><input type="password" id="auth-password"></div>
-      <div class="form-group" id="promocode-group" style="display:none;"><label>Promo / Test Code</label><input type="text" id="auth-promocode" placeholder="e.g. MYGAME-A1B2C3"></div>
-      
-      <div class="modal-links"><a id="forgot-link" onclick="openAuthModal('reset')">Forgot Password?</a></div>
-      <button type="submit" id="auth-submit-btn" class="btn-g" style="width:100%;padding:12px;">Submit</button>
-    </form>
-  </div>
-</div>
+            if (savedPromo && savedPromo.trim() !== '') {
+                vipBtn.style.display = 'inline-block';
+                statusMsg.textContent = 'Active Promo Code: ' + savedPromo;
+                statusMsg.className = 'status-msg success';
+            } else {
+                vipBtn.style.display = 'none';
+                statusMsg.textContent = '';
+            }
+        }
 
-<!-- AKSHAT ADMIN CONTROL PANEL MODAL -->
-<div id="admin-modal">
-  <div class="modal-box" style="max-width: 460px; max-height: 85vh; overflow-y: auto;">
-    <button class="close-modal" onclick="closeAdminModal()">✕</button>
-    <div class="modal-title" style="color:#ef4444;">⚙️ Akshat Admin Panel</div>
+        function submitPromoCode() {
+            const codeInput = document.getElementById('promoInput').value.trim();
+            const statusMsg = document.getElementById('statusMsg');
 
-    <div style="margin-bottom:20px; text-align:center;">
-      <button class="btn-g" onclick="generatePromoCode()" style="background:#c29d4c; color:#000; width:100%; padding:12px; font-weight:800;">⚡ Generate 30-Day Promo Code</button>
-    </div>
+            if (!codeInput) {
+                statusMsg.textContent = 'Please enter a valid code.';
+                statusMsg.className = 'status-msg error';
+                return;
+            }
 
-    <div style="margin-bottom:24px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.1);">
-      <h4 style="font-size:11px; color:var(--gold); letter-spacing:1px; text-transform:uppercase; margin-bottom:10px;">Active Unused Promo Codes</h4>
-      <div id="admin-codes-list"></div>
-    </div>
+            localStorage.setItem('vip_promo_code', codeInput);
+            document.getElementById('promoInput').value = '';
+            detectPromoCode();
+        }
 
-    <div style="padding-top:12px; border-top:1px solid rgba(255,255,255,0.1);">
-      <h4 style="font-size:11px; color:#ef4444; letter-spacing:1px; text-transform:uppercase; margin-bottom:10px;">Promo Accounts & Termination</h4>
-      <div id="admin-promo-users-list"></div>
-    </div>
-  </div>
-</div>
-
-<div id="cd-screen">
-  <div class="grid-bg"></div><div class="glow"></div>
-  <div class="cd-inner">
-    <div class="badge">🚀 Launch Day</div>
-    <div class="big-title">Mygame</div>
-    <div class="gold-bar"></div>
-    <div class="sub">The game begins now</div>
-    <div class="cd-nums" id="cd-nums">
-      <div class="cd-box"><div class="cd-num" id="cd-h">00</div><div class="cd-lbl">Hours</div></div>
-      <div class="cd-col">:</div>
-      <div class="cd-box"><div class="cd-num" id="cd-m">00</div><div class="cd-lbl">Mins</div></div>
-      <div class="cd-col">:</div>
-      <div class="cd-box"><div class="cd-num" id="cd-s">00</div><div class="cd-lbl">Secs</div></div>
-    </div>
-    <div class="live-msg" id="live-msg">🎮 We Are Live!</div>
-    <div class="btn-row auth-btns-group">
-      <button onclick="openAuthModal('register')" class="btn-g">Register Now</button>
-      <button onclick="openAuthModal('login')" class="btn-o">Login</button>
-      <a href="https://sites.google.com/view/mygamehelp" target="_top" class="btn-q">Help</a>
-    </div>
-  </div>
-</div>
-
-<div id="homepage">
-  <nav>
-    <a href="#" class="nav-logo">My<span>game</span></a>
-    <div class="nav-links">
-      <a href="#about" class="nav-item">About Developer</a>
-      <a href="rating-page.html" class="nav-item" style="color:var(--gold); font-weight:700;">⭐ Rate Us</a>
-      <a href="rating-view.html" class="nav-item">💬 View Ratings</a>
-      <button id="pwa-install-btn" class="btn-g" style="display: none; padding: 7px 18px; font-size: 11px;">Install App</button>
-      <div class="auth-btns-group" style="display:inline-flex; gap:8px;">
-        <a href="https://sites.google.com/view/mygamehelp" target="_top" class="btn-q" style="padding:7px 14px;font-size:11px;">Help</a>
-        <button onclick="openAuthModal('login')" class="btn-o" style="padding:7px 18px;font-size:11px;">Login</button>
-        <button onclick="openAuthModal('register')" class="btn-g" style="padding:7px 18px;font-size:11px;">Register</button>
-      </div>
-    </div>
-  </nav>
-
-  <section class="hero">
-    <div class="grid-bg"></div><div class="glow"></div>
-    <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;">
-      <div class="hero-badge"><div class="dot"></div> Now Live</div>
-      <div class="hero-title">Mygame</div>
-      <div class="gold-bar" style="width:80px;height:3px;margin:20px auto 0;"></div>
-      <div class="hero-sub">Play. Compete. Win.</div>
-      <div class="hero-btns">
-        <button onclick="openAuthModal('register')" class="btn-g" style="padding:15px 38px;font-size:14px;">Start Playing</button>
-        <button onclick="openAuthModal('login')" class="btn-o" style="padding:14px 34px;font-size:14px;">Login</button>
-      </div>
-    </div>
-  </section>
-
-  <section class="about-section" id="about">
-    <div class="about-container">
-      <div class="about-label">Creator Profile</div>
-      <h2 class="about-title">About the Developer</h2>
-      <div class="gold-bar" style="width:50px;height:2px;margin:0 auto 20px;"></div>
-      <p class="about-bio"><strong>Mygame Scratch</strong> was created and developed by <strong>Akshat</strong>.</p>
-      <div class="credits-box">
-        <h3>Community Integration</h3>
-        <p>Community Chat powered by <a href="https://chatinger-x.vercel.app/" target="_blank">ChatingerX</a>, created and developed by <strong>Pranav Jha</strong>.</p>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    <div class="footer-logo">My<span>game</span></div>
-    <div class="footer-copy">© 2026 Mygame Scratch · Created by Akshat</div>
-    <div class="footer-links">
-      <a href="#about">About Creator</a>
-      <a href="rating-page.html">Rate Us</a>
-      <a href="rating-view.html">View Ratings</a>
-      <a href="https://sites.google.com/view/mygamehelp" target="_top">Help</a>
-    </div>
-  </footer>
-</div>
-
-<script>
-  var launch = new Date('2026-06-28T12:30:00+05:30');
-  var revealed = false;
-  function pad(n){ return String(n).padStart(2,'0'); }
-
-  function reveal() {
-    if (revealed) return;
-    revealed = true;
-    document.getElementById('cd-nums').style.display = 'none';
-    document.getElementById('live-msg').style.display = 'block';
-    setTimeout(function(){
-      document.getElementById('cd-screen').classList.add('hide');
-      var hp = document.getElementById('homepage');
-      hp.style.display = 'block';
-      setTimeout(function(){ hp.classList.add('show'); }, 60);
-    }, 1800);
-  }
-
-  function tick(){
-    var diff = launch - Date.now();
-    if (diff <= 0){ reveal(); return; }
-    document.getElementById('cd-h').textContent = pad(Math.floor(diff/3600000));
-    document.getElementById('cd-m').textContent = pad(Math.floor((diff%3600000)/60000));
-    document.getElementById('cd-s').textContent = pad(Math.floor((diff%60000)/1000));
-  }
-  tick();
-  setInterval(tick, 1000);
-</script>
-
+        // Run detection immediately on load
+        window.addEventListener('DOMContentLoaded', detectPromoCode);
+    </script>
 </body>
 </html>
