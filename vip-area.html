@@ -13,16 +13,6 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
-    <!-- PAGE PROTECTION CODE: Redirects to index if promo code is missing -->
-    <script>
-        (function enforcePromoProtection() {
-            const promoCode = localStorage.getItem('vip_promo_code');
-            if (!promoCode || promoCode.trim() === '') {
-                window.location.replace("index.html");
-            }
-        })();
-    </script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <script>
@@ -36,7 +26,7 @@
         applyInitialTheme();
     </script>
 
-    <!-- FIREBASE INTEGRATION & LOGOUT FIX -->
+    <!-- FIREBASE INTEGRATION & PAGE PROTECTION CODE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
         import { 
@@ -48,6 +38,7 @@
         import { 
             getFirestore, 
             doc, 
+            getDoc,
             deleteDoc 
         } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
@@ -64,17 +55,46 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Protection Check: Redirect unauthenticated users
-        onAuthStateChanged(auth, (user) => {
+        // PAGE PROTECTION CHECK: Strictly verifies logged-in state AND active promo code access
+        onAuthStateChanged(auth, async (user) => {
             if (!user) {
-                window.location.replace("https://mygamescratch.vercel.app/");
+                window.location.replace("index.html");
+                return;
+            }
+
+            const MY_ADMIN_EMAIL = "akshatnahata24@gmail.com";
+            const isAdmin = user.email && user.email.toLowerCase() === MY_ADMIN_EMAIL.toLowerCase();
+
+            const userRef = doc(db, "users", user.uid);
+            const docSnap = await getDoc(userRef);
+            let hasPromoAccess = false;
+
+            if (docSnap.exists()) {
+                const uData = docSnap.data();
+                if (uData.tier === "promo" && uData.promoExpiry) {
+                    if (new Date(uData.promoExpiry) >= new Date()) {
+                        hasPromoAccess = true;
+                    }
+                }
+            }
+
+            // Check localStorage promo key or admin status
+            if (localStorage.getItem('vip_promo_code') || isAdmin) {
+                hasPromoAccess = true;
+            }
+
+            // If no promo code is present/active, bounce back to index.html
+            if (!hasPromoAccess) {
+                alert("Access Denied: A valid Promo Code is required to enter the VIP Area.");
+                window.location.replace("index.html");
             }
         });
 
         // Fixed Logout Function
         window.handleFirebaseLogout = function() {
             signOut(auth).then(() => {
-                window.location.replace("https://mygamescratch.vercel.app/");
+                localStorage.removeItem('vip_promo_code');
+                window.location.replace("index.html");
             }).catch((error) => {
                 alert("Error logging out: " + error.message);
             });
@@ -90,8 +110,9 @@
                 try {
                     await deleteDoc(doc(db, "users", user.uid));
                     await deleteUser(user);
+                    localStorage.removeItem('vip_promo_code');
                     alert("Your account has been deleted.");
-                    window.location.replace("https://mygamescratch.vercel.app/");
+                    window.location.replace("index.html");
                 } catch (error) {
                     alert("Error deleting account: " + error.message);
                 }
