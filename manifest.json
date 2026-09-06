@@ -1,38 +1,36 @@
 {
-  "name": "Mygame",
+  "id": "/",
+  "name": "Mygame Scratch",
   "short_name": "Mygame",
   "description": "Play free online Scratch games on Mygame Scratch.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0a0a0a",
-  "theme_color": "#c29d4c",
+  "background_color": "#0d0d0d",
+  "theme_color": "#c8a95a",
   "orientation": "any",
   "icons": [
     {
-      "src": "https://mygamescratch.vercel.app/icon-192.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mygame Mobile Preview"
     },
     {
-      "src": "https://mygamescratch.vercel.app/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Mygame Desktop Preview"
     }
   ]
-  "screenshots": [
-  {
-    "src": "/icon-192.png",
-    "sizes": "192x192",
-    "type": "image/png",
-    "form_factor": "narrow",
-    "label": "Mygame Home Screen"
-  },
-  {
-    "src": "/icon-192.png",
-    "sizes": "192x192",
-    "type": "image/png",
-    "form_factor": "wide",
-    "label": "Mygame Desktop View"
-  }
-]
 }
