@@ -1,0 +1,60 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><style>
+:root{--bg:#07101a;--panel:#0c1724;--panel2:#122235;--text:#eaf4ff;--muted:#91a4bb;--gold:#d7b15a;--cyan:#63e6ff;--pink:#ff668b;--green:#64e3a1;--red:#ff6575}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050a10;color:var(--text);font-family:Inter,system-ui,Segoe UI,Arial,sans-serif}body{display:flex;align-items:center;justify-content:center}.wrap{width:min(100vw,960px);height:min(100vh,540px);position:relative;background:linear-gradient(180deg,#081522,#04090f);overflow:hidden}.hud{position:absolute;z-index:5;inset:10px 12px auto;display:flex;gap:8px;align-items:center;justify-content:space-between;pointer-events:none}.hud .left,.hud .right{display:flex;gap:8px;align-items:center}.pill{background:rgba(6,14,24,.78);border:1px solid rgba(110,160,210,.25);backdrop-filter:blur(5px);padding:6px 9px;border-radius:10px;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.25)}.pill b{color:#fff}.badge{color:var(--gold);font-weight:700}.canvas{width:100%;height:100%;display:block;cursor:crosshair}.overlay{position:absolute;inset:0;display:none;z-index:10;background:rgba(3,7,12,.72);align-items:center;justify-content:center;padding:20px}.panel{width:min(92%,420px);background:linear-gradient(180deg,rgba(15,29,45,.98),rgba(7,15,24,.98));border:1px solid rgba(215,177,90,.35);border-radius:18px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.45);text-align:center}.panel h1{margin:0 0 8px;color:var(--gold);font-size:30px}.panel p{margin:8px 0;color:var(--muted);line-height:1.45}.btns{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}.btn{border:1px solid rgba(215,177,90,.45);background:#162a41;color:#fff;padding:9px 14px;border-radius:10px;font-weight:700;cursor:pointer}.btn:hover{background:#1c3855}.btn.primary{background:linear-gradient(180deg,#d9b660,#ad863a);color:#10100c;border-color:#ecd28f}.help{position:absolute;z-index:6;bottom:8px;left:12px;color:#7e91a7;font-size:10px;pointer-events:none}.mobile{position:absolute;z-index:7;inset:auto 10px 10px;display:none;justify-content:space-between;pointer-events:none}.mobile .cluster{display:flex;gap:7px}.touch{pointer-events:auto;user-select:none;border:1px solid rgba(255,255,255,.16);background:rgba(10,18,29,.74);color:#fff;width:46px;height:46px;border-radius:12px;font-size:18px}.bar{position:absolute;z-index:5;left:50%;top:10px;transform:translateX(-50%);width:min(36vw,240px);height:7px;background:rgba(255,255,255,.09);border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),#9a8bff);transform-origin:left}.toast{position:absolute;z-index:20;left:50%;bottom:18px;transform:translateX(-50%) translateY(20px);opacity:0;transition:.22s ease;background:rgba(4,10,17,.9);border:1px solid rgba(215,177,90,.35);padding:8px 12px;border-radius:10px;font-size:12px;pointer-events:none}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (max-width:700px){.mobile{display:flex}.help{display:none}.pill{font-size:10px;padding:5px 7px}.panel h1{font-size:24px}}
+</style></head><body><div class="wrap"><canvas class="canvas" width="960" height="540"></canvas><div id="hud" class="hud"></div><div class="overlay"><div class="panel"></div></div><div class="toast"></div><div class="help">A/D or arrows to dodge · Space for turbo</div></div><script>
+const cv=document.querySelector('.canvas'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height;
+const ov=document.querySelector('.overlay'),panel=document.querySelector('.panel'),toastEl=document.querySelector('.toast');
+function fit(){const r=cv.getBoundingClientRect(),sx=r.width/W,sy=r.height/H;return [sx,sy]}
+function pointer(e){const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height}}
+function showPanel(title,body,buttons){ov.style.display='flex';panel.innerHTML=`<h1>${title}</h1><p>${body}</p><div class="btns">${buttons.map((b,i)=>`<button class="btn ${i===0?'primary':''}" data-i="${i}">${b.text}</button>`).join('')}</div>`;panel.querySelectorAll('button').forEach((b,i)=>b.onclick=buttons[i].fn)}
+function hidePanel(){ov.style.display='none'}
+let toastTimer;function toast(t){toastEl.textContent=t;toastEl.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('show'),1400)}
+function cap(v,a,b){return Math.max(a,Math.min(b,v))}
+function rnd(a,b){return a+Math.random()*(b-a)}
+function ri(a,b){return Math.floor(rnd(a,b+1))}
+function rect(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(x,y,w,h)}
+function txt(t,x,y,size=18,c='#fff',align='left'){ctx.fillStyle=c;ctx.font=`700 ${size}px Inter,system-ui`;ctx.textAlign=align;ctx.fillText(t,x,y)}
+function circle(x,y,r,c){ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
+function line(x1,y1,x2,y2,c,w=2){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
+function save(k,v){localStorage.setItem('mg_'+k,JSON.stringify(v))}function load(k,d){try{return JSON.parse(localStorage.getItem('mg_'+k))??d}catch{return d}}
+
+const k={};
+addEventListener('keydown',e=>k[e.key.toLowerCase()]=1);
+addEventListener('keyup',e=>k[e.key.toLowerCase()]=0);
+let run=0,score=0,coins=0,hp=100,shield=0,speed=240,dash=0,lv=1,obs=[],gems=[],last=performance.now(),spawn=0,over=false;
+function reset(){run=0;score=0;coins=0;hp=100;shield=0;speed=240;dash=0;lv=1;obs=[];gems=[];spawn=0;over=false;hidePanel();last=performance.now();requestAnimationFrame(loop)}
+function update(dt){
+  run+=speed*dt; score=Math.floor(run/10); speed+=1.2*dt; spawn-=dt;
+  if(spawn<=0){
+    for(let i=0;i<ri(1,2);i++) obs.push({x:rnd(350,880),y:-50,w:34,h:34});
+    if(Math.random()<.45) gems.push({x:rnd(120,840),y:-30});
+    spawn=.38-Math.min(.12,run/18000);
+  }
+  for(const o of obs)o.y+=speed*dt;
+  for(const g of gems)g.y+=speed*dt;
+  obs=obs.filter(o=>o.y<H+70); gems=gems.filter(g=>g.y<H+40);
+  const px=150,py=450;
+  for(let i=obs.length-1;i>=0;i--){
+    const o=obs[i];
+    if(o.x<px+30&&o.x+o.w>px-30&&o.y<py+30&&o.y+o.h>py-30){
+      if(shield>0) shield=0; else hp-=18;
+      obs.splice(i,1);
+    }
+  }
+  for(let i=gems.length-1;i>=0;i--){
+    const g=gems[i];
+    if(Math.hypot(g.x-px,g.y-py)<34){coins++;gems.splice(i,1);dash=Math.min(100,dash+18);}
+  }
+  if(k[' ']&&dash>=35){speed+=70;dash-=35;toast('Turbo');k[' ']=0;}
+  lv=1+Math.floor(score/220);
+  if(hp<=0){
+    over=true;
+    showPanel('Run Over',`Score <b>${score}</b> · Coins <b>${coins}</b> · Level <b>${lv}</b>`,[{text:'Run again',fn:reset}]);
+  }
+}
+function round(x,y,w,h,r,c){ctx.fillStyle=c;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#070912';ctx.fillRect(0,0,W,H);for(let i=0;i<14;i++){const y=(i*48+run*.9)%H;rect(0,y,W,2,'#15223a')}for(const o of obs)round(o.x,o.y,o.w,o.h,10,'#ff677b');for(const g of gems){circle(g.x,g.y,12,'#67e8f9');circle(g.x,g.y,5,'#eafcff')}if(shield>0){ctx.strokeStyle='#63e6ff';ctx.lineWidth=4;ctx.beginPath();ctx.arc(150,450,33,0,Math.PI*2);ctx.stroke()}round(130,430,40,40,12,'#d7b15a');circle(143,444,4,'#1b2030');circle(157,444,4,'#1b2030');line(140,461,160,461,'#1b2030',3);txt('LEVEL '+lv,480,55,20,'#d7b15a','center')}
+function loop(t){const dt=Math.min(.032,(t-last)/1000);last=t;if(!over)update(dt);draw();document.querySelector('#hud').innerHTML=`<div class="left"><div class="pill">Score <b>${score}</b></div><div class="pill">Coins <b>${coins}</b></div></div><div class="right"><div class="pill">HP <b>${hp}</b></div><div class="pill">Dash <b>${Math.round(dash)}%</b></div></div>`;if(!over)requestAnimationFrame(loop)}
+reset();</script></body></html>
