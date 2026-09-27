@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Neon Rift: Arena</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="game" aria-label="Neon Rift Arena game"></canvas>
+    <div id="hud" class="hidden">
+      <div class="hud-left">
+        <div class="chip"><span>WAVE</span><b id="wave">1</b></div>
+        <div class="chip"><span>SCORE</span><b id="score">0</b></div>
+        <div class="chip"><span>COINS</span><b id="coins">0</b></div>
+      </div>
+      <div class="bars">
+        <div class="bar"><span class="label">HP</span><div class="track"><i id="hpBar"></i></div></div>
+        <div class="bar"><span class="label">XP</span><div class="track xp"><i id="xpBar"></i></div></div>
+      </div>
+      <div class="hud-right">
+        <div class="chip"><span>LEVEL</span><b id="level">1</b></div>
+        <button id="pauseBtn" class="icon-btn" aria-label="Pause">Ⅱ</button>
+      </div>
+    </div>
+
+    <section id="menu" class="screen">
+      <div class="panel hero-panel">
+        <div class="eyebrow">MYGAME ORIGINAL</div>
+        <h1>NEON RIFT</h1>
+        <p class="subtitle">Arena</p>
+        <p class="desc">Survive escalating waves, grab energy cores, choose upgrades, and break the Rift before it breaks you.</p>
+        <div class="controls">
+          <div><kbd>W A S D</kbd><span>Move</span></div>
+          <div><kbd>MOUSE</kbd><span>Aim &amp; fire</span></div>
+          <div><kbd>SHIFT</kbd><span>Dash</span></div>
+          <div><kbd>ESC</kbd><span>Pause</span></div>
+        </div>
+        <button id="playBtn" class="primary">PLAY ARENA</button>
+        <div class="small-note">Best score: <span id="bestScore">0</span></div>
+      </div>
+    </section>
+
+    <section id="levelUp" class="screen hidden">
+      <div class="panel upgrade-panel">
+        <div class="eyebrow">LEVEL UP</div>
+        <h2>Choose an upgrade</h2>
+        <div id="upgradeCards" class="upgrade-grid"></div>
+      </div>
+    </section>
+
+    <section id="pause" class="screen hidden">
+      <div class="panel compact">
+        <div class="eyebrow">RIFT PAUSED</div>
+        <h2>Take a breath.</h2>
+        <button id="resumeBtn" class="primary">RESUME</button>
+        <button id="restartBtn" class="secondary">RESTART</button>
+      </div>
+    </section>
+
+    <section id="gameOver" class="screen hidden">
+      <div class="panel compact">
+        <div class="eyebrow">RIFT COLLAPSED</div>
+        <h2>Run complete</h2>
+        <div class="stats">
+          <div><span>Score</span><b id="finalScore">0</b></div>
+          <div><span>Wave</span><b id="finalWave">1</b></div>
+          <div><span>Level</span><b id="finalLevel">1</b></div>
+        </div>
+        <button id="againBtn" class="primary">PLAY AGAIN</button>
+        <button id="menuBtn" class="secondary">MAIN MENU</button>
+      </div>
+    </section>
+
+    <div id="toast" class="toast hidden"></div>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
