@@ -1,4 +1,4 @@
-# neon-rift
+# circuit-rush
 
 Standalone browser game. No external libraries or remote game servers required.
 

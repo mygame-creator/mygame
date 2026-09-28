@@ -1,4 +1,4 @@
-# neon-rift
+# dungeon-zero
 
 Standalone browser game. No external libraries or remote game servers required.
 

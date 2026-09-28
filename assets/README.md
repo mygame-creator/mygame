@@ -1,14 +1,3 @@
-# Game Assets
+# Mygame Scratch — Shared Assets
 
-This folder is for assets used by the games in this project.
-
-Suggested structure:
-
-```text
-assets/
-├── images/
-├── models/
-├── textures/
-├── audio/
-├── fonts/
-└── ui/
+Site-wide assets can live here. Individual games keep their own assets inside `games/<game-name>/assets/`.
