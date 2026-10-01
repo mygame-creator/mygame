@@ -1,16 +1,16 @@
-# Mygame Scratch — Final Game Template
+# Mygame Scratch — Current Game Template
 
 ## Free (3)
 - Dungeon Dash
 - Tower Grid
 - Deep Mine
 
-## VIP (6)
+## VIP (2 currently active)
 - Neon Rift
-- Circuit Rush
 - Dungeon Zero
-- Skyline Rush
-- Skyforge Assault
-- Forgefall Protocol
 
-The site template and authentication pages are preserved. Game iframes point to local folders under `games/`.
+## Notes
+- Circuit Rush, Skyline Rush, Skyforge Assault, and Forgefall Protocol were removed from the current distribution because they were reported as not working.
+- Neon Rift and Dungeon Zero now spawn enemies more gradually.
+- The Watch Demo button was removed; the visual background/demo simulation can still run behind the start screen.
+- Existing site layout, navigation, authentication, ratings, and Free Area configuration were not redesigned.
